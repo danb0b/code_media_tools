@@ -152,8 +152,8 @@ if __name__=='__main__':
 #    print(kwargs)
     
     files2,other_files2  = sort_by_key(folder,**kwargs)
-    
-    files3 = group_small_folders(files2,5)
+    print(files2)
+    files3 = group_small_folders(files2,10)
     print(files3.keys())
 
     move_files(folder,files3)

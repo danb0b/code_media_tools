@@ -1,3 +1,2 @@
 @echo off
-set par1=%1
-python %HOMEDRIVE%%HOMEPATH%\code\code_pydevtools\pydevtools\catchall\sort_photos.py %par1%
+python %~dp0..\python\image_tools\sort_photos.py %1 %2 %3
