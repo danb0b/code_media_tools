@@ -52,30 +52,58 @@ def scale_pad(img,dimension,goal_ratio):
     if scale_rule == scale_by_max:
         goal = dimension
         scale1 = goal/w
-        scale2 = goal/h
-    if scale_rule == scale_by_height:
-        h_goal = dimension
-        scale1 = h_goal*goal_ratio/w
-        scale2 = h_goal/h
-    if scale_rule == scale_by_width:
-        w_goal = dimension
-        scale1 = w_goal/w
-        scale2 = w_goal/goal_ratio/h
-    scale = min(scale1,scale2)
-
-    w_new = int(w*scale)
-    h_new = int(h*scale)
-    
-    img_new = img.resize((w_new, h_new), Image.ANTIALIAS)
+        scale2 = goal/goal_ratio/h
+        scale3 = goal/h
+        scale4 = goal*goal_ratio/w
         
+        scale = min(scale1,scale2,scale3,scale4)
+        w_new = w*scale
+        h_new = h*scale
+
+    else:
+        if scale_rule == scale_by_height:
+            h_goal = dimension
+            scalew = h_goal*goal_ratio/w
+            scaleh = h_goal/h
+        if scale_rule == scale_by_width:
+            w_goal = dimension
+            scalew = w_goal/w
+            scaleh = w_goal/goal_ratio/h
+
+        if scalew<scaleh:
+            scale = scalew
+        else:
+            scale = scaleh
+    
+        w_new = w*scale
+        h_new = h*scale
+    
+        
+    if scale_rule == scale_by_max:
+        if scale==scale1:
+            canvas_w = dimension
+            canvas_h = int(dimension/goal_ratio)
+        if scale==scale2:
+            canvas_w = dimension
+            canvas_h = int(dimension/goal_ratio)
+        if scale==scale3:
+            canvas_w = int(dimension*goal_ratio)
+            canvas_h = dimension
+        if scale==scale4:
+            canvas_w = int(dimension*goal_ratio)
+            canvas_h = dimension
+            
     if scale_rule == scale_by_height:
         canvas_h = dimension
         canvas_w = int(canvas_h*goal_ratio)
-        img_new2 = pad_center(img_new,canvas_w,canvas_h)
     if scale_rule == scale_by_width:
         canvas_w = dimension
         canvas_h = int(canvas_w/goal_ratio)
-        img_new2 = pad_center(img_new,canvas_w,canvas_h)
+
+    w_new = int(w_new)
+    h_new = int(h_new)
+    img_new = img.resize((w_new, h_new), Image.ANTIALIAS)
+    img_new2 = pad_center(img_new,canvas_w,canvas_h)
 
     return img_new2
     
