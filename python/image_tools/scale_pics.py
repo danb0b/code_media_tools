@@ -38,6 +38,46 @@ def crop(img,goal_ratio):
         img = crop_center(img,w,h)
 
     return img
+
+def pad_center(img, w,h,color=(255,255,255,0)):
+    new_img = Image.new(img.mode, (int(w), int(h)), color)
+    
+    new_img.paste(img, (int((w-img.width)/2),int((h-img.height)/2)))
+    return new_img
+
+def scale_pad(img,dimension,goal_ratio):
+    w = img.width
+    h = img.height
+
+    if scale_rule == scale_by_max:
+        goal = dimension
+        scale1 = goal/w
+        scale2 = goal/h
+    if scale_rule == scale_by_height:
+        h_goal = dimension
+        scale1 = h_goal*goal_ratio/w
+        scale2 = h_goal/h
+    if scale_rule == scale_by_width:
+        w_goal = dimension
+        scale1 = w_goal/w
+        scale2 = w_goal/goal_ratio/h
+    scale = min(scale1,scale2)
+
+    w_new = int(w*scale)
+    h_new = int(h*scale)
+    
+    img_new = img.resize((w_new, h_new), Image.ANTIALIAS)
+        
+    if scale_rule == scale_by_height:
+        canvas_h = dimension
+        canvas_w = int(canvas_h*goal_ratio)
+        img_new2 = pad_center(img_new,canvas_w,canvas_h)
+    if scale_rule == scale_by_width:
+        canvas_w = dimension
+        canvas_h = int(canvas_w/goal_ratio)
+        img_new2 = pad_center(img_new,canvas_w,canvas_h)
+
+    return img_new2
     
 def scale_by_width(img,width):
     wpercent = (width / float(img.size[0]))
@@ -81,8 +121,13 @@ if __name__=='__main__':
     crop_test =False 
     if '-c' in sys.argv[1:]:
         crop_test =True
-
     print('crop:', crop_test )
+
+    pad_test =False 
+    if '-p' in sys.argv[1:]:
+        pad_test=True
+    print('pad:', pad_test )
+
     
     
     goal_ratio = 7/5
@@ -160,10 +205,15 @@ if __name__=='__main__':
         img = Image.open(filename)
         b = os.path.split(filename)
     
-        if crop_test:    
-            img = crop(img,goal_ratio)
-            
-        img = scale_rule(img,dimension)
+        if not pad_test:
+            if crop_test:    
+                img = crop(img,goal_ratio)
+                
+            img = scale_rule(img,dimension)
+
+        else:    
+            img = scale_pad(img,dimension,goal_ratio)
+
         newfilename = os.path.join(path1,subfolder,b[1])
         #print(newfilename)
         img.save(newfilename,quality=quality)  
