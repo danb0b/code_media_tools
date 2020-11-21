@@ -1,2 +1,2 @@
 @echo off
-python %HOMEDRIVE%%HOMEPATH%\code\code_pydevtools\pydevtools\catchall\scale_pics.py %*
+python %~dp0..\python\image_tools\scale_pics.py %*
