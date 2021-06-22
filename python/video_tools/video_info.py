@@ -76,13 +76,14 @@ class StreamInfo(object):
 
 class VideoInfo(object):
     def __init__(self,file):
-        
-        s2 = 'ffprobe -v error -show_format -show_streams '+'"'+file+'"'
-        result=subprocess.run(s2, shell=True, capture_output=True)
-        self.ffprobe_output = result.stdout.decode()
-        self.stream_dicts = parse(self.ffprobe_output)
-        self.streams = [StreamInfo.build_from_dict(item) for item in self.stream_dicts]
-    
+        if os.path.exists(file):
+            s2 = 'ffprobe -v error -show_format -show_streams '+'"'+file+'"'
+            result=subprocess.run(s2, shell=True, capture_output=True)
+            self.ffprobe_output = result.stdout.decode()
+            self.stream_dicts = parse(self.ffprobe_output)
+            self.streams = [StreamInfo.build_from_dict(item) for item in self.stream_dicts]
+        else:
+            raise(FileNotFoundError(file))
 
     def get_videos(self):
         f = []
@@ -93,7 +94,10 @@ class VideoInfo(object):
             except AttributeError:
                 pass
         return f
-    
+    def get_max_length(self):
+        result = max([item.duration.float for item in self.get_videos()])
+        return result
+
 
               
 def frame_to_time(frame,frame_rate):
