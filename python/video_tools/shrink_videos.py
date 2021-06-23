@@ -185,7 +185,10 @@ if __name__=='__main__':
     video_path= args.video_path
     print('video_path: ',video_path)
     
-    crf = int(args.crf)
+    if args.crf is not None:
+        crf = int(args.crf)
+    else:
+        crf = None
     
     force = args.force or False
     # path = args.path
