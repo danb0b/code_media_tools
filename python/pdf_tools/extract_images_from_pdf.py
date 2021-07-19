@@ -1,91 +1,79 @@
 # -*- coding: utf-8 -*-
 """
-Spyder Editor
+Created on Fri Jul 16 11:07:21 2021
 
-This is a temporary script file.
+@author: danaukes
 """
-
-import PyPDF4 as pypdf
-
-from PIL import Image
-
-#fn='egr_honors_opportunity_document_f2017.pdf'
-
-#if __name__ == '__main__':
-
-def get_images(filepath,op):
-    print(op)
-    path,file = os.path.split(filepath)
-    filename = os.path.splitext(file)[0]
-
-    input1 = pypdf.PdfFileReader(open(filepath, "rb"))
-
-    ii=0
-    for jj in range(input1.numPages):
-
-        page0 = input1.getPage(jj)
-        # for key,value in 
-        print(jj)
-        try:
-
-            xObjects = page0['/Resources']['/XObject']
-        
-            for key,value in xObjects.items():
-                xObject = value.getObject()
-                if xObject['/Subtype'] == '/Image':
-                    
-                    output_file = '{0}_{1:03.0f}'.format(filename,ii)
-                    
-                    output_path_filename = os.path.join(op,output_file)
-                    print(output_path_filename)
-                    size = (xObject['/Width'], xObject['/Height'])
-                    data = xObject.getData()
-                    if xObject['/ColorSpace'] == '/DeviceRGB':
-                        mode = "RGB"
-                    else:
-                        mode = "P"
-        
-                    if xObject['/Filter'] == '/FlateDecode':
-                        img = Image.frombytes(mode, size, data)
-                        img.save(output_path_filename  + ".png")
-                    elif xObject['/Filter'] == '/DCTDecode':
-                        img = open(output_path_filename  + ".jpg", "wb")
-                        img.write(data)
-                        img.close()
-                    elif xObject['/Filter'] == '/JPXDecode':
-                        img = open(output_path_filename + ".jp2", "wb")
-                        img.write(data)
-                        img.close()
-                    
-                    ii+=1
-
-        except KeyError:
-            pass
-                
 import os
-import sys
+import fitz
 
-# directory = 'C:/Users/danaukes/Dropbox (Personal)/scans'
-# directory = 'C:/Users/danaukes/Dropbox (Personal)/projects/2019-12-27 Recipes'
-# directory = r'G:\My Drive\classes\2020-2021-S-EGR-557-foldable-robotics\shared documents\course-documents'
-
+import argparse
 import glob
+import os
+import yaml
+import subprocess
+
+# path = r'C:\Users\danaukes\Desktop'
+# path_out = os.path.join(path,'output')
+# os.makedirs(path_out)
+
+# file = os.path.join(path,'biomechanics.pdf')
+def save_images(file):
+    folder,filename = os.path.split(file)
+    filename_plain,my_ext = os.path.splitext(filename)
+    extract_folder = os.path.join(folder,filename_plain)
+    if not os.path.exists(extract_folder):
+        os.makedirs(extract_folder)
+    
+    doc = fitz.open(file)
+    for ii in range(len(doc)):
+        jj = 0
+        for img in doc.getPageImageList(ii):
+            xref = img[0]
+            filename = os.path.join(extract_folder,"page_{0:03.0f}-{1:02.0f}.png".format(ii,jj))
+            pix1 = fitz.Pixmap(doc, xref)
+            if (pix1.n - pix1.alpha) < 4:       # this is GRAY or RGB
+                pix1.writePNG(filename)
+            else:               # CMYK: convert to RGB first
+                pix1 = fitz.Pixmap(fitz.csRGB, pix1)
+                pix1.writePNG(filename)
+                pix1 = None
+            pix = None
+            jj+=1
+
+if __name__=='__main__':
+
+    parser = argparse.ArgumentParser()
+    
+    parser.add_argument('path',metavar='path',type=str,help='path', default = '*.pdf')
+    # parser.add_argument('-p','--path',dest='path',default = '*.mp4')
+    # parser.add_argument('-c','--config',dest='config',default = None)
+    # parser.add_argument('-f','--filetype',dest='filetypes',default = 'mp4')
+    # parser.add_argument('-t','--thumbs',dest='thumbs',action='store_true', default = None)
+    # parser.add_argument('-t','--thumb_path',dest='thumb_path',default = None)
+    # parser.add_argument('-v','--video_path',dest='video_path',default = None)
+    # parser.add_argument('-q','--crf',dest='crf',default = None)
+    # parser.add_argument('-p','--preset',dest='preset',default = None)
+    # parser.add_argument('-f','--force',dest='force',action='store_true', default = None)
+    # parser.add_argument('command',metavar='command',type=str,help='command', default = '')
+    # parser.add_argument('--token',dest='token',default = None)
+
+    args = parser.parse_args()
+    print('path: ',args.path)
+    # print('config: ',args.config)
+
+    # force = args.force or False
+    # path = args.path
+    # print('computed path: ',path)
+    
+    # filetypes = args.filetypes.split(',')
+    filenames = glob.glob(os.path.expanduser(args.path))
+    # files = [clean_path(file) for file in files]
+    print(yaml.dump(filenames))
 
 
-#for dirpath, dirnames, filenames, dirnames in os.walk(directory):
-# pdfs = glob.glob(os.path.join(directory,'*.pdf'))
-
-pdfs = [r'G:\My Drive\classes\2020-2021-S-EGR-557-foldable-robotics\shared documents\course-documents\2021_Intro_Bio_small.pdf']
-for filepath in pdfs:
+    for filename in filenames:
+        save_images(filename)
     
-    path,file = os.path.split(filepath)
-    
-    output_path = os.path.normpath(os.path.join(path,'output'))
-    
-    
-    if not os.path.exists(output_path):
-        if not os.path.isdir(output_path):
-            os.mkdir(output_path)
-
-    get_images(filepath,output_path)
-    
+    # for item in files:
+    #     if os.path.splitext(item)[1]=='.yaml':
