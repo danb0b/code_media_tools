@@ -24,49 +24,58 @@ def get_images(filepath,op):
     for jj in range(input1.numPages):
 
         page0 = input1.getPage(jj)
-        xObject = page0['/Resources']['/XObject'].getObject()
-    
-    
-        for obj in xObject:
-            if xObject[obj]['/Subtype'] == '/Image':
-                
-                output_file = '{0}_{1:03.0f}'.format(filename,ii)
-                
-                output_path_filename = os.path.join(op,output_file)
-                print(output_path_filename)
-                size = (xObject[obj]['/Width'], xObject[obj]['/Height'])
-                data = xObject[obj].getData()
-                if xObject[obj]['/ColorSpace'] == '/DeviceRGB':
-                    mode = "RGB"
-                else:
-                    mode = "P"
-    
-                if xObject[obj]['/Filter'] == '/FlateDecode':
-                    img = Image.frombytes(mode, size, data)
-                    img.save(output_path_filename  + ".png")
-                elif xObject[obj]['/Filter'] == '/DCTDecode':
-                    img = open(output_path_filename  + ".jpg", "wb")
-                    img.write(data)
-                    img.close()
-                elif xObject[obj]['/Filter'] == '/JPXDecode':
-                    img = open(output_path_filename + ".jp2", "wb")
-                    img.write(data)
-                    img.close()
-                
-                ii+=1
-                
+        # for key,value in 
+        print(jj)
+        try:
+
+            xObjects = page0['/Resources']['/XObject']
+        
+            for key,value in xObjects.items():
+                xObject = value.getObject()
+                if xObject['/Subtype'] == '/Image':
+                    
+                    output_file = '{0}_{1:03.0f}'.format(filename,ii)
+                    
+                    output_path_filename = os.path.join(op,output_file)
+                    print(output_path_filename)
+                    size = (xObject['/Width'], xObject['/Height'])
+                    data = xObject.getData()
+                    if xObject['/ColorSpace'] == '/DeviceRGB':
+                        mode = "RGB"
+                    else:
+                        mode = "P"
+        
+                    if xObject['/Filter'] == '/FlateDecode':
+                        img = Image.frombytes(mode, size, data)
+                        img.save(output_path_filename  + ".png")
+                    elif xObject['/Filter'] == '/DCTDecode':
+                        img = open(output_path_filename  + ".jpg", "wb")
+                        img.write(data)
+                        img.close()
+                    elif xObject['/Filter'] == '/JPXDecode':
+                        img = open(output_path_filename + ".jp2", "wb")
+                        img.write(data)
+                        img.close()
+                    
+                    ii+=1
+
+        except KeyError:
+            pass
                 
 import os
 import sys
 
-directory = 'C:/Users/danaukes/Dropbox (Personal)/scans'
-directory = 'C:/Users/danaukes/Dropbox (Personal)/projects/2019-12-27 Recipes'
+# directory = 'C:/Users/danaukes/Dropbox (Personal)/scans'
+# directory = 'C:/Users/danaukes/Dropbox (Personal)/projects/2019-12-27 Recipes'
+# directory = r'G:\My Drive\classes\2020-2021-S-EGR-557-foldable-robotics\shared documents\course-documents'
+
 import glob
 
 
 #for dirpath, dirnames, filenames, dirnames in os.walk(directory):
-pdfs = glob.glob(os.path.join(directory,'*.pdf'))
+# pdfs = glob.glob(os.path.join(directory,'*.pdf'))
 
+pdfs = [r'G:\My Drive\classes\2020-2021-S-EGR-557-foldable-robotics\shared documents\course-documents\2021_Intro_Bio_small.pdf']
 for filepath in pdfs:
     
     path,file = os.path.split(filepath)
