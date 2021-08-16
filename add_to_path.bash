@@ -1,4 +1,4 @@
-#!/usr/bin/sh
+#!/usr/bin/bash
 
 echo "export PATH=\$PATH:$PWD/bash" >> ~/.bashrc
 #chmod +x bash/*.sh
