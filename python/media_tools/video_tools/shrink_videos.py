@@ -10,7 +10,8 @@ import glob
 import os
 import yaml
 import subprocess
-import video_tools.video_info as vi
+import media_tools.video_tools.video_info as vi
+import media_tools
 
 class Movie(object):
     
@@ -58,8 +59,12 @@ class Movie(object):
             
     def __init__(self,video_source,video_dest=None,thumb_dest=None,video_path=None,thumb_path=None,crf=None,preset=None,start_time=None,end_time=None,thumb_time=None):
         self.video_source = video_source
-        self.video_dest = video_dest or self.build_video_dest(video_source,video_path or self._default_video_path)
-        self.thumb_dest = thumb_dest or self.build_thumb_dest(video_source,thumb_path or self._default_thumb_path)
+        video_dest = video_dest or self.build_video_dest(video_source,video_path or self._default_video_path)
+        if video_dest is not None:
+            self.video_dest = clean_path(video_dest)
+        thumb_dest = thumb_dest or self.build_thumb_dest(video_source,thumb_path or self._default_thumb_path)
+        if thumb_dest is not None:
+            self.thumb_dest = clean_path(thumb_dest)
         self.crf = crf or Movie._default_crf
         self.preset = preset or Movie._default_preset
         self.start_time = start_time
@@ -162,24 +167,14 @@ if __name__=='__main__':
     parser = argparse.ArgumentParser()
     
     parser.add_argument('path',metavar='path',type=str,help='path', default = '*.mp4')
-    # parser.add_argument('-p','--path',dest='path',default = '*.mp4')
-    # parser.add_argument('-c','--config',dest='config',default = None)
-    # parser.add_argument('-f','--filetype',dest='filetypes',default = 'mp4')
-    # parser.add_argument('-t','--thumbs',dest='thumbs',action='store_true', default = None)
     parser.add_argument('-t','--thumb_path',dest='thumb_path',default = None)
     parser.add_argument('-v','--video_path',dest='video_path',default = None)
     parser.add_argument('-q','--crf',dest='crf',default = None)
     parser.add_argument('-p','--preset',dest='preset',default = None)
     parser.add_argument('-f','--force',dest='force',action='store_true', default = None)
-    # parser.add_argument('command',metavar='command',type=str,help='command', default = '')
-    # parser.add_argument('--token',dest='token',default = None)
+    parser.add_argument('-r','--recursive',dest='recursive',action='store_true', default = None)
     args = parser.parse_args()
-    print('path: ',args.path)
-    # print('config: ',args.config)
 
-    # thumbs = args.thumbs
-    # print('thumbs: ',thumbs)
-    # print('filetype: ',args.filetypes)
     thumb_path = args.thumb_path
     print('thumb_path: ',thumb_path)
     video_path= args.video_path
@@ -191,16 +186,16 @@ if __name__=='__main__':
         crf = None
     
     force = args.force or False
-    # path = args.path
-    # print('computed path: ',path)
     
-    # filetypes = args.filetypes.split(',')
-    files = glob.glob(args.path)
-    # files = [clean_path(file) for file in files]
+    path = clean_path(args.path)
+    files = glob.glob(path,recursive=args.recursive)
+    files = [item for item in files if os.path.splitext(item)[1][1:].lower() in media_tools.video_filetypes]
+    
+    print('path: ',path)
     print(yaml.dump(files))
     
     for item in files:
-        if os.path.splitext(item)[1]=='.yaml':
+        if os.path.splitext(item)[1]=='.yaml' or os.path.splitext(item)[1]=='.yml':
             print('process yaml',item)
             my_yaml = load_yaml(item)
             for yaml_movie in my_yaml:

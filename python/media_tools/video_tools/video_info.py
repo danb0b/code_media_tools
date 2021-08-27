@@ -11,7 +11,8 @@ import os
 import sys
 
 def parse2(string):
-    strings = string.split('\r\n')
+    string.replace('\r', '')
+    strings = string.split('\n')
     keyval = []
     for item in strings:
         a = item.split('=')
@@ -110,8 +111,8 @@ def frame_to_time(frame,frame_rate):
 
 
 if __name__== '__main__':
-    path= 'C:/Users/danaukes/Desktop/Conference Video.mp4'
-    
+    # path= 'C:/Users/danaukes/Desktop/Conference Video.mp4'
+    path = '/home/danaukes/cloud/drive_asu_idealab/videos/render/2020-03-03 bouncy-mod.mp4'
     #s2 = 'ffprobe -v error -show_format -show_streams '+'"'+path+'"'
     #b=subprocess.run(s2, shell=True, capture_output=True)
     #d = b.stdout.decode()
