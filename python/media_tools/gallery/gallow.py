@@ -29,7 +29,8 @@ size = 128, 128
 def fix(input):
     return os.path.normpath(os.path.expanduser(input))
     
-source_root = fix(r'~\Dropbox (Personal)\Camera Uploads from Sara')
+# source_root = fix(r'~\Dropbox (Personal)\Camera Uploads from Sara')
+source_root = fix('/home/danaukes/nas/photos/2021/sara dropbox')
 gallery_root = fix('~/Desktop/gallery')
 
 if os.path.exists(gallery_root):
@@ -58,12 +59,15 @@ for folder,subfolders,files in os.walk(source_root):
         
     for item in videos:
         print('process video',item)
-        movie = Movie(os.path.join(folder,item),video_path = folder,thumb_path = folder,crf = None,preset=None)
+        movie = Movie(os.path.join(folder,item),video_path = newfolder,thumb_path = newfolder,crf = None,preset=None)
         try:
             movie.process(force=True)
+            i = Image.open(movie.thumb_dest)
+            i.thumbnail(size)
+            i.save(movie.thumb_dest)
         except FileNotFoundError:
             print('file not found: ',item)
-        
+
     #     # i.show()
     #     # display(i)
     
