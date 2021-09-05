@@ -6,7 +6,7 @@ Created on Wed Jul 14 20:22:05 2021
 """
 
 import PIL
-from PIL import Image
+from PIL import Image,  ExifTags
 import os
 import argparse
 import yaml
@@ -14,6 +14,7 @@ import shutil
 from IPython.display import display
 import media_tools
 from media_tools.video_tools.shrink_videos import Movie
+import subprocess
 
 # listOfImageNames = ['/path/to/images/1.png',
                     # '/path/to/images/2.png']
@@ -23,18 +24,49 @@ from media_tools.video_tools.shrink_videos import Movie
 #     def __init__(self,file):
 #         self.file = file
         
-size = 128, 128
+size = 1000,200
 
+rebuild_from_scratch=False
+rebuild_html_only = True
+
+
+def get_rotate_amount(exif):
+    try:
+        tags_inverse = dict([(value.lower(),key) for key,value in ExifTags.TAGS.items()])
+        orientation_key = tags_inverse['orientation']
+        
+        # exif = image.getexif()
+    
+        if exif[orientation_key] == 3:
+            rotate_amount = 180
+        elif exif[orientation_key] == 6:
+            rotate_amount = 270
+        elif exif[orientation_key] == 8:
+            rotate_amount = 90
+        else:
+            rotate_amount = 0
+
+        return rotate_amount
+
+    except (AttributeError, KeyError, IndexError):
+        return 0
 
 def fix(input):
     return os.path.normpath(os.path.expanduser(input))
     
 # source_root = fix(r'~\Dropbox (Personal)\Camera Uploads from Sara')
-source_root = fix('/home/danaukes/nas/photos/2021/sara dropbox')
-gallery_root = fix('~/Desktop/gallery')
+# source_root = fix(r'/home/danaukes/nas/photos/2021')
+# source_root = fix(r'/home/danaukes/nas/photos/2020/2020-01-12 Sledding at the Cabin')
+# source_root = fix('/home/danaukes/nas/photos/2021/sara dropbox')
+source_root = fix('~/cloud/drive_asu_idealab/videos')
 
-if os.path.exists(gallery_root):
-    shutil.rmtree(gallery_root)
+# gallery_root = fix('~/Desktop/gallery')
+# gallery_root = fix('~/Desktop/gallery2')
+gallery_root = fix('/home/danaukes/cloud/drive_asu/gallery')
+
+if rebuild_from_scratch:
+    if os.path.exists(gallery_root):
+        shutil.rmtree(gallery_root)
 
 for folder,subfolders,files in os.walk(source_root):
     images = [item for item in files if os.path.splitext(item)[1][1:] in media_tools.image_filetypes]
@@ -47,32 +79,84 @@ for folder,subfolders,files in os.walk(source_root):
     elements = to_strip.split(os.path.sep)
     tail = folder.split(os.path.sep)[len(elements):]
     newfolder = os.path.join(gallery_root,*tail)
-    os.makedirs(newfolder)
+    try:
+        os.makedirs(newfolder)
+    except FileExistsError:
+        if rebuild_from_scratch:
+            raise
+        else:
+            pass
+
+    #images = [item for item in files if os.path.splitext(item)[1][1:] in image_filetypes]
+    #videos = [item for item in files if os.path.splitext(item)[1][1:] in video_filetypes]
+    
+    #print(yaml.dump(images))
+    #print(yaml.dump(videos))
+
+    markdown_file_path=os.path.join(newfolder,'index.md')
+    html_file_path=os.path.join(newfolder,'index.html')
+
+    s = ''    
+    s+='## Subfolders\n\n'
+    for item in subfolders:
+        s+='* [{0}]({0}/index.html)\n'.format(item)
+    s+='\n## Pictures\n\n'
+    for item in images:
+        s+='[![]({0})]({0}) '.format(item)
+    s+='\n\n## Videos\n\n'
+    for item in videos:
+        thumb = os.path.splitext(item)[0]+'.png'
+        vid = os.path.splitext(item)[0]+'.mp4'
+        s+='[![]({0})]({1}) '.format(thumb,vid)
+    with open(markdown_file_path,'w') as f:
+        f.write(s)
+
+    subprocess.run('pandoc "{0}" -o "{1}"'.format(markdown_file_path,html_file_path),capture_output=True,shell=True)
+    
     # to_strip = os.path.normpath(to_strip).split(os.path.sep)
     
     # os.makedirs()
     
-    for item in images:
-        i = Image.open(os.path.join(folder,item))
-        i.thumbnail(size)
-        i.save(os.path.join(newfolder,item))
+    bad_photos = []
+    jj_last = 0
+    if not rebuild_html_only:
+        for ii,item in enumerate(images):
+            
+            jj = (round(ii/len(images)*100))
+            if jj>jj_last:
+                print('\r',jj, end = "")
+            
+            from_file_name = os.path.join(folder,item)
+            try:
+                i = Image.open(from_file_name)
+                e = i.getexif()
+                r = get_rotate_amount(e)
+                if r in (0,180):
+                    i.thumbnail(size)
+                else:
+                    i.thumbnail(size[::-1])
+                if r!=0:
+                    i=i.rotate(r, expand=True)
+                i.save(os.path.join(newfolder,item))
+            #     # i.show()
+            #     # display(i)
+            except PIL.UnidentifiedImageError:
+                bad_photos.append(from_file_name)
+            jj_last = jj
         
-    for item in videos:
-        print('process video',item)
-        movie = Movie(os.path.join(folder,item),video_path = newfolder,thumb_path = newfolder,crf = None,preset=None)
-        try:
-            movie.process(force=True)
-            i = Image.open(movie.thumb_dest)
-            i.thumbnail(size)
-            i.save(movie.thumb_dest)
-        except FileNotFoundError:
-            print('file not found: ',item)
+        # for item in videos:
+        #     print('process video',item)
+        #     movie = Movie(os.path.join(folder,item),video_path = newfolder,thumb_path = newfolder,crf = None,preset=None)
+        #     try:
+        #         movie.process(force=rebuild_from_scratch)
+        #         i = Image.open(movie.thumb_dest)
+        #         i.thumbnail(size)
+        #         i.save(movie.thumb_dest)
+        #     except FileNotFoundError:
+        #         print('file not found: ',item)
 
     #     # i.show()
-    #     # display(i)
-    
-    
-    
+    #     # display(i)    
 if __name__=='__main__':
 
     pass
