@@ -26,6 +26,9 @@ import subprocess
         
 size = 1000,200
 
+rebuild_from_scratch=False
+rebuild_html_only = True
+
 
 def get_rotate_amount(exif):
     try:
@@ -57,11 +60,13 @@ def fix(input):
 # source_root = fix('/home/danaukes/nas/photos/2021/sara dropbox')
 source_root = fix('~/cloud/drive_asu_idealab/videos')
 
-gallery_root = fix('~/Desktop/gallery')
+# gallery_root = fix('~/Desktop/gallery')
 # gallery_root = fix('~/Desktop/gallery2')
+gallery_root = fix('/home/danaukes/cloud/drive_asu/gallery')
 
-if os.path.exists(gallery_root):
-    shutil.rmtree(gallery_root)
+if rebuild_from_scratch:
+    if os.path.exists(gallery_root):
+        shutil.rmtree(gallery_root)
 
 for folder,subfolders,files in os.walk(source_root):
     images = [item for item in files if os.path.splitext(item)[1][1:] in media_tools.image_filetypes]
@@ -74,7 +79,13 @@ for folder,subfolders,files in os.walk(source_root):
     elements = to_strip.split(os.path.sep)
     tail = folder.split(os.path.sep)[len(elements):]
     newfolder = os.path.join(gallery_root,*tail)
-    os.makedirs(newfolder)
+    try:
+        os.makedirs(newfolder)
+    except FileExistsError:
+        if rebuild_from_scratch:
+            raise
+        else:
+            pass
 
     #images = [item for item in files if os.path.splitext(item)[1][1:] in image_filetypes]
     #videos = [item for item in files if os.path.splitext(item)[1][1:] in video_filetypes]
@@ -88,10 +99,15 @@ for folder,subfolders,files in os.walk(source_root):
     s = ''    
     s+='## Subfolders\n\n'
     for item in subfolders:
-        s+='* [{0}]({0})\n'.format(item)
+        s+='* [{0}]({0}/index.html)\n'.format(item)
     s+='\n## Pictures\n\n'
     for item in images:
-        s+='[![]({0})]({1})'.format(item,os.path.join(folder,item))
+        s+='[![]({0})]({0}) '.format(item)
+    s+='\n\n## Videos\n\n'
+    for item in videos:
+        thumb = os.path.splitext(item)[0]+'.png'
+        vid = os.path.splitext(item)[0]+'.mp4'
+        s+='[![]({0})]({1}) '.format(thumb,vid)
     with open(markdown_file_path,'w') as f:
         f.write(s)
 
@@ -103,40 +119,41 @@ for folder,subfolders,files in os.walk(source_root):
     
     bad_photos = []
     jj_last = 0
-    for ii,item in enumerate(images):
+    if not rebuild_html_only:
+        for ii,item in enumerate(images):
+            
+            jj = (round(ii/len(images)*100))
+            if jj>jj_last:
+                print('\r',jj, end = "")
+            
+            from_file_name = os.path.join(folder,item)
+            try:
+                i = Image.open(from_file_name)
+                e = i.getexif()
+                r = get_rotate_amount(e)
+                if r in (0,180):
+                    i.thumbnail(size)
+                else:
+                    i.thumbnail(size[::-1])
+                if r!=0:
+                    i=i.rotate(r, expand=True)
+                i.save(os.path.join(newfolder,item))
+            #     # i.show()
+            #     # display(i)
+            except PIL.UnidentifiedImageError:
+                bad_photos.append(from_file_name)
+            jj_last = jj
         
-        jj = (round(ii/len(images)*100))
-        if jj>jj_last:
-            print('\r',jj, end = "")
-        
-        from_file_name = os.path.join(folder,item)
-        try:
-            i = Image.open(from_file_name)
-            e = i.getexif()
-            r = get_rotate_amount(e)
-            if r in (0,180):
-                i.thumbnail(size)
-            else:
-                i.thumbnail(size[::-1])
-            if r!=0:
-                i=i.rotate(r, expand=True)
-            i.save(os.path.join(newfolder,item))
-        #     # i.show()
-        #     # display(i)
-        except PIL.UnidentifiedImageError:
-            bad_photos.append(from_file_name)
-        jj_last = jj
-    
-    for item in videos:
-        print('process video',item)
-        movie = Movie(os.path.join(folder,item),video_path = newfolder,thumb_path = newfolder,crf = None,preset=None)
-        try:
-            movie.process(force=True)
-            i = Image.open(movie.thumb_dest)
-            i.thumbnail(size)
-            i.save(movie.thumb_dest)
-        except FileNotFoundError:
-            print('file not found: ',item)
+        # for item in videos:
+        #     print('process video',item)
+        #     movie = Movie(os.path.join(folder,item),video_path = newfolder,thumb_path = newfolder,crf = None,preset=None)
+        #     try:
+        #         movie.process(force=rebuild_from_scratch)
+        #         i = Image.open(movie.thumb_dest)
+        #         i.thumbnail(size)
+        #         i.save(movie.thumb_dest)
+        #     except FileNotFoundError:
+        #         print('file not found: ',item)
 
     #     # i.show()
     #     # display(i)    
