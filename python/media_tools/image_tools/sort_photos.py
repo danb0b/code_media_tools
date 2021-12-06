@@ -9,9 +9,12 @@ import sys
 import os
 import shutil
 #import time
+import yaml
 
 import PIL.Image
 import PIL.ExifTags
+
+import argparse
 
 #ignore = []
 #ignore.append('UserComment')
@@ -28,12 +31,13 @@ screen_grab_sizes.append((1136,640))
 screen_grab_sizes.append((1920,1080))
 reverse_keys = dict([value,key] for key,value in PIL.ExifTags.TAGS.items())
 
-def sort_by_key(folder,searchkey,subfilter = None):
+extensions = ['.jpg','.png','.jpeg']
+
+
+def sort_by_key(folder,searchkey,subfilter = None,debug=False):
     return_same = lambda x:x
     subfilter = subfilter or return_same
     files = {}
-    
-    extensions = ['.jpg','.png']
     
     other_files = {}
 #    other_files['noexif']= []
@@ -42,8 +46,13 @@ def sort_by_key(folder,searchkey,subfilter = None):
     
     
     for filename in os.listdir(folder):
+        
         filename2 = os.path.join(folder,filename)
         if not os.path.isdir(filename2):
+
+            if debug:
+                print(filename)
+
             try:
                 dummy,ext = os.path.splitext(filename2)
                 if ext.lower() in extensions:
@@ -54,36 +63,36 @@ def sort_by_key(folder,searchkey,subfilter = None):
     #                print(rect)
                     if rect in screen_grab_sizes:
                         try:
-                            other_files['screengrab'].append((folder,filename))
+                            other_files['screengrab'].append(filename)
                         except KeyError:
                             other_files['screengrab']=[]
-                            other_files['screengrab'].append((folder,filename))
+                            other_files['screengrab'].append(filename)
                     else:
     
                         try:
                             exif_data = img._getexif()
                             if exif_data is None:
                                 try:
-                                    other_files['noexif'].append((folder,filename))
+                                    other_files['noexif'].append(filename)
                                 except KeyError:
                                     other_files['noexif']=[]
-                                    other_files['noexif'].append((folder,filename))
+                                    other_files['noexif'].append(filename)
                             else:
                                 search_key_rev = reverse_keys[searchkey]
                                 if search_key_rev not in exif_data.keys():
                                     try:
-                                        other_files['nokey'].append((folder,filename))
+                                        other_files['nokey'].append(filename)
                                     except KeyError:
                                         other_files['nokey']=[]
-                                        other_files['nokey'].append((folder,filename))
+                                        other_files['nokey'].append(filename)
                                 else:
                                     filter_key = exif_data[search_key_rev]
                                     filter_key = subfilter(filter_key)
                                     try:
-                                        files[filter_key].append((folder,filename))
+                                        files[filter_key].append(filename)
                                     except KeyError:
                                         files[filter_key] = []
-                                        files[filter_key].append((folder,filename))
+                                        files[filter_key].append(filename)
                         except AttributeError as e:
                             if e.args[0]=="'PngImageFile' object has no attribute '_getexif'":
                                 pass
@@ -105,19 +114,28 @@ def group_small_folders(files,num):
     return files
         
             
-def move_files(folder,files):
+def move_files(folder,files,debug = False,dry_run=False):
 #    print(files)
     #time.sleep(5)
     for key, value in files.items():
         if not not key:
             new_folder = os.path.join(folder,key)
             if not os.path.exists(new_folder):
-                os.mkdir(new_folder)
-            for dirname,filename in value:
-                try:
-                    shutil.move(os.path.join(dirname,filename),os.path.join(new_folder,filename))
-                except shutil.SameFileError:
-                    pass
+                if debug:
+                    print('make dir: ',new_folder)
+                if not dry_run:
+                    os.mkdir(new_folder)
+
+            for filename in value:
+                if debug:
+                    print('move ',filename,' to ',new_folder)
+                if not dry_run:
+                    try:
+                        shutil.move(os.path.join(folder,filename),os.path.join(new_folder,filename))
+                    except shutil.SameFileError as f:
+                        print(f)
+                    except FileNotFoundError as f:
+                        print(f)
                 
 def date_time_to_date(date_time):
     date,time = date_time.split()
@@ -128,33 +146,49 @@ def date_time_to_date(date_time):
 
 if __name__=='__main__':
 
-    date_kwargs = dict(searchkey = 'DateTime',subfilter=date_time_to_date)
-    model_kwargs = dict(searchkey = 'Model')
+    parser = argparse.ArgumentParser()
+    
+    parser.add_argument('path',metavar='path',type=str,help='path', default = None)
+    parser.add_argument('-s','--sort-method',dest='sort_method',help='sort method = "date" or "model(default)"',default = 'model')
+    parser.add_argument('-d','--dry-run',dest='dry_run',action='store_true', default = None)
+    parser.add_argument('--debug',dest='debug',action='store_true', help='debug = True or False', default = False)
+    parser.add_argument('-o','--output',dest='output', help='output filename', default = None)
+    parser.add_argument('-i','--input',dest='input', help='input filename', default = None)
+    
+
+    args = parser.parse_args()
+
+
+    date_kwargs = dict(searchkey = 'DateTime',subfilter=date_time_to_date, debug=args.debug)
+    model_kwargs = dict(searchkey = 'Model', debug=args.debug)
     kwargss= {'model':model_kwargs,'date':date_kwargs}
 
-#    folder,file = os.path.split(sys.argv[0])
-#    print('argv: ',os.path.abspath(sys.argv[0]))
-    print('curdir: ',os.path.abspath(os.curdir))
-    folder = os.path.abspath(os.curdir)
+    folder = os.path.normpath(os.path.abspath(os.path.expanduser(args.path)))
 
-#    print(folder)
-    #folder = 'C:\\Users\\danaukes\\Dropbox (ASU)\\camera'
-    #folder = 'Y:\\2018\\Sara'
-    #folder = 'C:\\Users\\danaukes\\Desktop\\camera'
-    #folder = 'C:\\Users\\danaukes\\Desktop\\photos'
-#    folder = 'Y:\\2018'
-#    folder = 'C:\\Users\\danaukes\\Dropbox (Personal)\\Camera Uploads from Sara'
+    if args.debug:
+        print('folder: ',folder)
+        print('sort method: ',args.sort_method)
+        print('debug: ',args.debug)
+        print('dry run: ',args.dry_run)
+        print('input: ',args.input)
+        print('output: ',args.output)
 
-    if len(sys.argv)>=2:
-        kwargs = kwargss[sys.argv[1].lower()]
+    if not args.input:
+        kwargs = kwargss[args.sort_method]
+        files2,other_files2  = sort_by_key(folder,**kwargs)
+        files3 = group_small_folders(files2,10)
     else:
-        kwargs = dict(searchkey = 'Model')
-#    print(kwargs)
-    
-    files2,other_files2  = sort_by_key(folder,**kwargs)
-    print(files2)
-    files3 = group_small_folders(files2,10)
-    print(files3.keys())
+        with open(os.path.normpath(os.path.expanduser(args.input))) as f:
+            files3,other_files2 = yaml.load(f,Loader=yaml.Loader)
 
-    move_files(folder,files3)
-    move_files(folder,other_files2)    
+
+    if args.debug:
+        # print(files2)
+        print(files3.keys())
+
+    move_files(folder,files3,debug = args.debug,dry_run = args.dry_run)
+    move_files(folder,other_files2,debug = args.debug,dry_run = args.dry_run)    
+    
+    if args.output:
+        with open(os.path.normpath(os.path.expanduser(args.output)),'w') as f:
+            yaml.dump([files3,other_files2],f)

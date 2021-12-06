@@ -189,7 +189,7 @@ if __name__=='__main__':
     
     path = clean_path(args.path)
     files = glob.glob(path,recursive=args.recursive)
-    files = [item for item in files if os.path.splitext(item)[1][1:].lower() in media_tools.video_filetypes]
+    files = [item for item in files if os.path.splitext(item)[1][1:].lower() in (media_tools.video_filetypes+media_tools.yaml_filetypes)]
     
     print('path: ',path)
     print(yaml.dump(files))

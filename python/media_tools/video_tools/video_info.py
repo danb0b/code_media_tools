@@ -9,6 +9,8 @@ import subprocess
 import re
 import os
 import sys
+import argparse
+import yaml
 
 def parse2(string):
     string.replace('\r', '')
@@ -44,24 +46,28 @@ def parse(string):
 
 class KeyInfo(object):
     def __init__(self,value):
-        self.string = value
+        self.value= value
 
-        try:
-            self.float = self.string_to_float(value)
-        except Exception:
-            pass
+    #     try:
+    #         self.float = self.string_to_float(value)
+    #     except Exception:
+    #         pass
 
-        try:
-            self.int = self.string_to_int(value)
-        except Exception:
-            pass
+    #     try:
+    #         self.int = self.string_to_int(value)
+    #     except Exception:
+    #         pass
 
-    @staticmethod    
-    def string_to_float(item):
-        return float(eval(item))
-    @staticmethod
-    def string_to_int(item):
-        return int(str(eval(item)))
+    # @staticmethod    
+    # def string_to_float(item):
+    #     return float(eval(item))
+    # @staticmethod
+    # def string_to_int(item):
+    #     return int(str(eval(item)))
+    def __str__(self):
+        return str(self.value)
+    def __repr__(self):
+        return str(self)
     
         
 class StreamInfo(object):
@@ -90,13 +96,13 @@ class VideoInfo(object):
         f = []
         for stream in self.streams:
             try:
-                if stream.codec_type.string == 'video':
+                if stream.codec_type.value == 'video':
                     f.append(stream)
             except AttributeError:
                 pass
         return f
     def get_max_length(self):
-        result = max([item.duration.float for item in self.get_videos()])
+        result = max([float(eval(item.duration.value)) for item in self.get_videos()])
         return result
 
 
@@ -111,8 +117,15 @@ def frame_to_time(frame,frame_rate):
 
 
 if __name__== '__main__':
+    parser = argparse.ArgumentParser()
+    
+    parser.add_argument('path',metavar='path',type=str,help='path', default = None)
+
+    args = parser.parse_args()
+
+    path = os.path.normpath(os.path.expanduser(args.path))
     # path= 'C:/Users/danaukes/Desktop/Conference Video.mp4'
-    path = '/home/danaukes/cloud/drive_asu_idealab/videos/render/2020-03-03 bouncy-mod.mp4'
+    # path = '/home/danaukes/cloud/drive_asu_idealab/videos/render/2020-03-03 bouncy-mod.mp4'
     #s2 = 'ffprobe -v error -show_format -show_streams '+'"'+path+'"'
     #b=subprocess.run(s2, shell=True, capture_output=True)
     #d = b.stdout.decode()
@@ -123,6 +136,9 @@ if __name__== '__main__':
     a = VideoInfo(path)
     #g = StreamInfo.build_from_dict(f[0])
     #duration = string_to_num(f[0]['r_frame_rate'])
-    f = a.get_videos()
-    g = f[0]
-    print(g.duration.float)
+    # f = a.get_videos()
+    # g = f[0]
+    # print(g.duration.float)
+    s = yaml.dump(a.stream_dicts)
+    print(s)
+    # print(a.get_max_length())
