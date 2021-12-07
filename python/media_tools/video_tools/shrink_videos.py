@@ -17,8 +17,8 @@ class Movie(object):
     
     _default_crf = 35
     _default_preset = 'ultrafast'
-    _default_video_path = 'videos'
-    _default_thumb_path = None
+    _default_video_path = 'video'
+    _default_thumb_path = 'thumb'
     _default_start_time = None
     _default_end_time = None
     _default_thumb_time = None
@@ -120,7 +120,7 @@ class Movie(object):
     def compose_thumb_string(self):
         mt_string = '-ss {0:.3f} '.format(self.thumb_time or self.compute_thumb_time())
         
-        s = 'ffmpeg '+mt_string+' -i "'+self.video_source+'" -frames:v 1 "'+self.thumb_dest+'"'
+        s = 'ffmpeg '+mt_string+' -i "'+self.video_source+'" -q:v 1 -qscale:v 2 -frames:v 1 "'+self.thumb_dest+'"'
         return s
     
     def process(self,force=False):

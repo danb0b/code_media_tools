@@ -27,7 +27,7 @@ import subprocess
 size = 1000,200
 
 rebuild_from_scratch=False
-rebuild_html_only = True
+rebuild_html_only = False
 
 
 def get_rotate_amount(exif):
@@ -62,7 +62,7 @@ source_root = fix('~/cloud/drive_asu_idealab/videos')
 
 # gallery_root = fix('~/Desktop/gallery')
 # gallery_root = fix('~/Desktop/gallery2')
-gallery_root = fix('/home/danaukes/cloud/drive_asu/gallery')
+gallery_root = fix('/home/danaukes/Desktop/gallery3')
 
 if rebuild_from_scratch:
     if os.path.exists(gallery_root):
@@ -105,7 +105,7 @@ for folder,subfolders,files in os.walk(source_root):
         s+='[![]({0})]({0}) '.format(item)
     s+='\n\n## Videos\n\n'
     for item in videos:
-        thumb = os.path.splitext(item)[0]+'.png'
+        thumb = os.path.splitext(item)[0]+'_thumb.png'
         vid = os.path.splitext(item)[0]+'.mp4'
         s+='[![]({0})]({1}) '.format(thumb,vid)
     with open(markdown_file_path,'w') as f:
@@ -144,16 +144,17 @@ for folder,subfolders,files in os.walk(source_root):
                 bad_photos.append(from_file_name)
             jj_last = jj
         
-        # for item in videos:
-        #     print('process video',item)
-        #     movie = Movie(os.path.join(folder,item),video_path = newfolder,thumb_path = newfolder,crf = None,preset=None)
-        #     try:
-        #         movie.process(force=rebuild_from_scratch)
-        #         i = Image.open(movie.thumb_dest)
-        #         i.thumbnail(size)
-        #         i.save(movie.thumb_dest)
-        #     except FileNotFoundError:
-        #         print('file not found: ',item)
+        for item in videos:
+            print('process video',item)
+            movie = Movie(os.path.join(folder,item),video_path = newfolder,thumb_path = newfolder,crf = 21,preset='slow')
+            try:
+                movie.process(force=rebuild_from_scratch)
+                i = Image.open(movie.thumb_dest)
+                i.thumbnail(size)
+                thumb = os.path.splitext(movie.thumb_dest)[0]+'_thumb.png'
+                i.save(thumb)
+            except FileNotFoundError:
+                print('file not found: ',item)
 
     #     # i.show()
     #     # display(i)    
