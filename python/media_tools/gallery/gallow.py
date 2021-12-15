@@ -28,7 +28,11 @@ size = 1000,200
 
 rebuild_from_scratch=False
 rebuild_html_only = False
-
+crf = None
+# crf=21
+preset = None
+# preset = 'slow'
+verbose = False
 
 def get_rotate_amount(exif):
     try:
@@ -54,15 +58,11 @@ def get_rotate_amount(exif):
 def fix(input):
     return os.path.normpath(os.path.expanduser(input))
     
-# source_root = fix(r'~\Dropbox (Personal)\Camera Uploads from Sara')
-# source_root = fix(r'/home/danaukes/nas/photos/2021')
-# source_root = fix(r'/home/danaukes/nas/photos/2020/2020-01-12 Sledding at the Cabin')
-# source_root = fix('/home/danaukes/nas/photos/2021/sara dropbox')
 source_root = fix('~/cloud/drive_asu_idealab/videos')
+# source_root = fix('~/cloud/drive_stanford/library/videos')
 
-# gallery_root = fix('~/Desktop/gallery')
-# gallery_root = fix('~/Desktop/gallery2')
-gallery_root = fix('/home/danaukes/Desktop/gallery3')
+gallery_root = fix('~/Desktop/gallery')
+# gallery_root = fix('/home/danaukes/Desktop/library_videos')
 
 if rebuild_from_scratch:
     if os.path.exists(gallery_root):
@@ -72,8 +72,9 @@ for folder,subfolders,files in os.walk(source_root):
     images = [item for item in files if os.path.splitext(item)[1][1:] in media_tools.image_filetypes]
     videos = [item for item in files if os.path.splitext(item)[1][1:] in media_tools.video_filetypes]
     
-    print(yaml.dump(images))
-    print(yaml.dump(videos))
+    if verbose:
+        print(yaml.dump(images))
+        print(yaml.dump(videos))
     
     to_strip = os.path.commonpath([source_root,folder])
     elements = to_strip.split(os.path.sep)
@@ -145,10 +146,11 @@ for folder,subfolders,files in os.walk(source_root):
             jj_last = jj
         
         for item in videos:
-            print('process video',item)
-            movie = Movie(os.path.join(folder,item),video_path = newfolder,thumb_path = newfolder,crf = 21,preset='slow')
+            if verbose:
+                print('process video',item)
+            movie = Movie(os.path.join(folder,item),video_path = newfolder,thumb_path = newfolder,crf = crf,preset=preset)
             try:
-                movie.process(force=rebuild_from_scratch)
+                movie.process(force=rebuild_from_scratch,verbose=verbose)
                 i = Image.open(movie.thumb_dest)
                 i.thumbnail(size)
                 thumb = os.path.splitext(movie.thumb_dest)[0]+'_thumb.png'

@@ -81,6 +81,10 @@ class StreamInfo(object):
         return self
 
 
+class NoVideoStream(Exception):
+    pass
+
+
 class VideoInfo(object):
     def __init__(self,file):
         if os.path.exists(file):
@@ -102,8 +106,11 @@ class VideoInfo(object):
                 pass
         return f
     def get_max_length(self):
-        result = max([float(eval(item.duration.value)) for item in self.get_videos()])
-        return result
+        try:
+            result = max([float(eval(item.duration.value)) for item in self.get_videos()])
+            return result
+        except ValueError:
+            raise(NoVideoStream())
 
 
               
