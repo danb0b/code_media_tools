@@ -41,12 +41,10 @@ if __name__=='__main__':
     
     parser = argparse.ArgumentParser()
     
-    parser.add_argument('path',metavar='path',type=str,help='path', default = None)
-    # parser.add_argument('-s','--sort-method',dest='sort_method',help='sort method = "date" or "model(default)"',default = 'model')
-    # parser.add_argument('-d','--dry-run',dest='dry_run',action='store_true', default = None)
-    # parser.add_argument('--debug',dest='debug',action='store_true', help='debug = True or False', default = False)
-    # parser.add_argument('-o','--output',dest='output', help='output filename', default = None)
-    # parser.add_argument('-i','--input',dest='input', help='input filename', default = None)
+    parser.add_argument('path',metavar='path',type=str,help='path', default = None,nargs='+')
+
     args = parser.parse_args()
 
-    extract(args.path)
+    paths = [os.path.normpath(os.path.expanduser(item)) for item in args.path]
+    for path in paths:
+        extract(path)
