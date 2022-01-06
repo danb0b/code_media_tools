@@ -28,11 +28,11 @@ size = 1000,200
 
 rebuild_from_scratch=False
 rebuild_html_only = False
-crf = None
-# crf=21
-preset = None
-# preset = 'slow'
-verbose = False
+#crf = None
+crf=21
+#preset = None
+preset = 'slow'
+verbose = True
 
 def get_rotate_amount(exif):
     try:
@@ -69,8 +69,8 @@ if rebuild_from_scratch:
         shutil.rmtree(gallery_root)
 
 for folder,subfolders,files in os.walk(source_root):
-    images = [item for item in files if os.path.splitext(item)[1][1:] in media_tools.image_filetypes]
-    videos = [item for item in files if os.path.splitext(item)[1][1:] in media_tools.video_filetypes]
+    images = [item for item in files if (os.path.splitext(item)[1][1:]).lower() in media_tools.image_filetypes]
+    videos = [item for item in files if (os.path.splitext(item)[1][1:]).lower() in media_tools.video_filetypes]
     
     if verbose:
         print(yaml.dump(images))
