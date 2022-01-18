@@ -58,11 +58,11 @@ def get_rotate_amount(exif):
 def fix(input):
     return os.path.normpath(os.path.expanduser(input))
     
-source_root = fix('~/cloud/drive_asu_idealab/videos')
-# source_root = fix('~/cloud/drive_stanford/library/videos')
+#source_root = fix('~/cloud/drive_asu_idealab/videos')
+source_root = fix('~/cloud/drive_stanford/library/videos')
 
-gallery_root = fix('~/Desktop/gallery')
-# gallery_root = fix('/home/danaukes/Desktop/library_videos')
+#gallery_root = fix('~/Desktop/gallery')
+gallery_root = fix('/home/danaukes/Desktop/library_videos')
 
 if rebuild_from_scratch:
     if os.path.exists(gallery_root):
