@@ -7,5 +7,5 @@ Created on Fri Aug 27 11:17:26 2021
 """
 
 image_filetypes = ['jpg','jpeg','png','gif']
-video_filetypes = ['mov','mp4','avi','mkv','webm',',mpg']
+video_filetypes = ['mov','mp4','avi','mkv','webm','mpg','wmv']
 yaml_filetypes = ['yaml','yml']
