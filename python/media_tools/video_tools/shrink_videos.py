@@ -214,6 +214,7 @@ if __name__=='__main__':
     files = [item for item in files if os.path.splitext(item)[1][1:].lower() in (media_tools.video_filetypes+media_tools.yaml_filetypes)]
     
     if args.verbose:
+        verbose = args.verbose
         print('path: ',path)
         print(yaml.dump(files))
     
@@ -225,7 +226,7 @@ if __name__=='__main__':
             for yaml_movie in my_yaml:
                 movie = Movie.build_from_dict(yaml_movie,video_path = video_path,thumb_path = thumb_path,crf = crf,preset=args.preset)
                 try:
-                    movie.process(force=force,verbose=verbose)
+                    movie.process()
                 except FileNotFoundError:
                     print('file not found: ',yaml_movie)
         else:
