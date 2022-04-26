@@ -234,7 +234,7 @@ if __name__=='__main__':
                 print('process video',item)
             movie = Movie(item,video_path = video_path,thumb_path = thumb_path,crf = crf,preset=args.preset)
             try:
-                movie.process(force=force,verbose=verbose)
+                movie.process(force=force,verbose=args.verbose)
             except FileNotFoundError:
                 print('file not found: ',item)
             
