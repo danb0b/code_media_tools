@@ -15,7 +15,7 @@ import shutil
 
 def pick_key(file,data,priority):
     keys = data.keys()
-    
+
     for key in priority:
         if key in keys:
             return key
@@ -28,10 +28,10 @@ def get_value(file,data,priority):
     except KeyError:
         value = None
     return value
-            
+
 def sort_size(size):
     return tuple((sorted(size))[::-1])
-        
+
 def get_size(file,data):
     h_key = pick_key(file,data,height_priority)
     w_key = pick_key(file,data,width_priority)
@@ -42,7 +42,7 @@ def get_size(file,data):
 
     except KeyError:
         return None
-    
+
     return sort_size((w,h))
 
 
@@ -94,6 +94,12 @@ def get_info(path,recursive = False,sample = None):
             for ii,(file,data) in enumerate(zip(full_filenames,metadata)):
                 
                 model = get_value(file, data, model_priority)
+
+                if not not model:
+                    has_model = 'has_model'
+                else:
+                    has_model = 'no_model'
+
                 mime = get_value(file, data, mime_priority)
                 try:
                     mime_class = mime.split('/')[0]
@@ -113,6 +119,7 @@ def get_info(path,recursive = False,sample = None):
                 
                 my_info = {}
                 my_info['model'] = model
+                my_info['has_model'] = has_model
                 my_info['date_time'] = date_time
                 my_info['date'] = date
                 my_info['size'] = size
@@ -191,7 +198,7 @@ if __name__=='__main__':
                 sorted_info[key] = [file]
     
         try:        
-            sorted_info['Unsorted'] = sorted_info[None]
+            sorted_info['unsorted'] = sorted_info[None]
             del sorted_info[None]
         except KeyError:
             pass
@@ -199,7 +206,7 @@ if __name__=='__main__':
         for key in list(sorted_info):
             value = sorted_info[key]
             if len(value)<int(args.min_folder_num):
-                sorted_info['Unsorted'].extend(value)
+                sorted_info['unsorted'].extend(value)
                 del sorted_info[key]
                 
         if args.output:
