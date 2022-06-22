@@ -28,15 +28,15 @@ def save_images(file):
     doc = fitz.open(file)
     for ii in range(len(doc)):
         jj = 0
-        for img in doc.getPageImageList(ii):
+        for img in doc.get_page_images(ii):
             xref = img[0]
             filename = os.path.join(extract_folder,"page_{0:03.0f}-{1:02.0f}.png".format(ii,jj))
             pix1 = fitz.Pixmap(doc, xref)
             if (pix1.n - pix1.alpha) < 4:       # this is GRAY or RGB
-                pix1.writePNG(filename)
+                pix1.save(filename)
             else:               # CMYK: convert to RGB first
                 pix1 = fitz.Pixmap(fitz.csRGB, pix1)
-                pix1.writePNG(filename)
+                pix1.save(filename)
                 pix1 = None
             pix = None
             jj+=1
