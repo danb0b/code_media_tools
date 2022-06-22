@@ -27,11 +27,14 @@ import subprocess
 size = 1000,200
 
 rebuild_from_scratch=False
-rebuild_html_only = False
+#rebuild_from_scratch=True
+rebuild_html_only = True
 #crf = None
-crf=21
+#crf=21
+crf=40
 #preset = None
-preset = 'slow'
+#preset = 'slow'
+preset = 'ultrafast'
 verbose = True
 
 def get_rotate_amount(exif):
@@ -58,10 +61,12 @@ def get_rotate_amount(exif):
 def fix(input):
     return os.path.normpath(os.path.expanduser(input))
     
-source_root = fix('~/cloud/drive_asu_idealab/videos')
+#source_root = fix('~/cloud/drive_asu_idealab/videos')
+source_root = fix('/storage/nas/photos/2021')
 # source_root = fix('~/cloud/drive_stanford/library/videos')
 
-gallery_root = fix('~/Desktop/gallery')
+#gallery_root = fix('~/Desktop/gallery')
+gallery_root = fix('~/Desktop/2021')
 # gallery_root = fix('/home/danaukes/Desktop/library_videos')
 
 if rebuild_from_scratch:
