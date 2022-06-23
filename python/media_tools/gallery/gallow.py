@@ -25,6 +25,7 @@ import subprocess
 #         self.file = file
         
 size = 1000,200
+size_non_thumbnail = 1000,1000
 
 rebuild_from_scratch=False
 #rebuild_from_scratch=True
@@ -108,11 +109,13 @@ for folder,subfolders,files in os.walk(source_root):
         s+='* [{0}]({0}/index.html)\n'.format(item)
     s+='\n## Pictures\n\n'
     for item in images:
-        s+='[![]({0})]({0}) '.format(item)
+        a,b = os.path.splitext(item)
+        s+='[![]({0})]({1}) '.format(a+'_thumb'+b,item)
     s+='\n\n## Videos\n\n'
     for item in videos:
-        thumb = os.path.splitext(item)[0]+'_thumb.png'
-        vid = os.path.splitext(item)[0]+'.mp4'
+        a,b = os.path.splitext(item)
+        thumb = a+'_thumb.png'
+        vid = a+'.mp4'
         s+='[![]({0})]({1}) '.format(thumb,vid)
     with open(markdown_file_path,'w') as f:
         f.write(s)
@@ -137,13 +140,19 @@ for folder,subfolders,files in os.walk(source_root):
                 i = Image.open(from_file_name)
                 e = i.getexif()
                 r = get_rotate_amount(e)
+                non_i = i.copy()
                 if r in (0,180):
                     i.thumbnail(size)
+                    non_i.thumbnail(size_non_thumbnail)
                 else:
                     i.thumbnail(size[::-1])
+                    non_i.thumbnail(size_non_thumbnail[::-1])
                 if r!=0:
                     i=i.rotate(r, expand=True)
-                i.save(os.path.join(newfolder,item))
+                    non_i=non_i.rotate(r, expand=True)
+                a,b = os.path.splitext(item)
+                i.save(os.path.join(newfolder,a+'_thumb'+b))
+                non_i.save(os.path.join(newfolder,item))
             #     # i.show()
             #     # display(i)
             except PIL.UnidentifiedImageError:
