@@ -27,9 +27,9 @@ import subprocess
 size = 1000,200
 size_non_thumbnail = 1000,1000
 
-rebuild_from_scratch=False
-#rebuild_from_scratch=True
-rebuild_html_only = True
+#rebuild_from_scratch=False
+rebuild_from_scratch=True
+rebuild_html_only = False
 #crf = None
 #crf=21
 crf=40
