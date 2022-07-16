@@ -63,11 +63,11 @@ def fix(input):
     return os.path.normpath(os.path.expanduser(input))
     
 #source_root = fix('~/cloud/drive_asu_idealab/videos')
-source_root = fix('/storage/nas/photos/2021')
+source_root = fix('/storage/nas/photos/2022')
 # source_root = fix('~/cloud/drive_stanford/library/videos')
 
 #gallery_root = fix('~/Desktop/gallery')
-gallery_root = fix('~/Desktop/2021')
+gallery_root = fix('~/Desktop/2022')
 # gallery_root = fix('/home/danaukes/Desktop/library_videos')
 
 if rebuild_from_scratch:
