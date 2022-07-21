@@ -10,8 +10,8 @@ import os
 import shutil
 import yaml
 
-path_from = '/home/danaukes/nas/photos/2022/'
-path_to = '/home/danaukes/cloud/drive_stanford/backups/nas/photos/2022/'
+path_from = '/nas/photos/2022/'
+path_to = '/cloud/drive_stanford/backups/nas/photos/2022/'
 
 dry_run = False
 verbose = True
