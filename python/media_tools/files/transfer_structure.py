@@ -10,44 +10,43 @@ import os
 import shutil
 import yaml
 
-path_from = '/nas/photos/2022/'
-path_to = '/cloud/drive_stanford/backups/nas/photos/2022/'
-
 dry_run = False
 verbose = True
 files_from_to = []
 
-for path, subdirs, files in os.walk(path_from):
-    files1 = [os.path.join(path,file) for file in files]
-    files2= [item.split(path_from)[1] for item in files1]
-    files20 = []
-    for item in files2:
-        if item.startswith('/'):
-            files20.append(item[1:])
-        else:
-            files20.append(item)
-    files3= [os.path.join(path_to,item) for item in files20]
-    files4 = [os.path.join(path_to,item) for item in files]
-    files_from_to.extend(zip(files4,files3))
+settings = os.path.normpath(os.path.abspath(os.path.expanduser('~/structure_2021.yaml')))
 
-settings = os.path.normpath(os.path.abspath(os.path.expanduser('~/structure.yaml')))
+if verbose:
+    print('loading structure')
+    
+with open(settings ,'r') as f:
+    info = yaml.load(f,Loader = yaml.Loader)
 
-with open(settings ,'w') as f:
-    yaml.dump(files_from_to,f)
-    
-    
+path_to = '/home/danaukes/Desktop/photos/2021'
+
+files_from_to = []
+
 all_folders = []
-    
-for file_from, file_to in files_from_to:
-    all_folders.append(os.path.split(file_to)[0])
 
+for item in info['files']:
+    if verbose:
+        print(item)
+    folder,filename = os.path.split(item)
+    file_from = os.path.join(path_to,filename)
+    file_to= os.path.join(path_to,item)
+    all_folders.append(folder)
+    files_from_to.append((file_from,file_to))
+    
 all_folders = list(set(all_folders))
 
 for item in all_folders:
     if verbose:
         print('make new directory: ',item)
     if not dry_run:
-        os.makedirs(item,exist_ok=True)
+        try:
+            os.makedirs(item,exist_ok=True)
+        except FileNotFoundError:
+            pass
     
 for file_from, file_to in files_from_to:
     if verbose:
