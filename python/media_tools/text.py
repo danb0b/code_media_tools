@@ -20,7 +20,7 @@ def eliminate_multiple_characters(string_in,char):
         l = len(string_in)
     return string_in
     
-def slugify(string_in,max_len = 24):
+def slugify(string_in,max_len = 64):
     string_in = string_in[:]
     string_in = string_in.replace(' ','-')
     string_in = string_in.replace('/','-')
