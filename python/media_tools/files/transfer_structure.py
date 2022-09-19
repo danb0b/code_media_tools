@@ -14,7 +14,7 @@ dry_run = False
 verbose = True
 files_from_to = []
 
-settings = os.path.normpath(os.path.abspath(os.path.expanduser('~/structure_2021.yaml')))
+settings = os.path.normpath(os.path.abspath(os.path.expanduser('~/structure_2022.yaml')))
 
 if verbose:
     print('loading structure')
@@ -22,7 +22,8 @@ if verbose:
 with open(settings ,'r') as f:
     info = yaml.load(f,Loader = yaml.Loader)
 
-path_to = '/home/danaukes/Desktop/photos/2021'
+#path_to = '/home/danaukes/Desktop/photos/2021'
+path_to = '/cloud/drive_stanford/backups/nas/photos/2022/unsorted'
 
 files_from_to = []
 

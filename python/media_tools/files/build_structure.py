@@ -10,7 +10,7 @@ import os
 import shutil
 import yaml
 
-path_from = '/nas/photos/2021/'
+path_from = '/storage/nas/photos/2022/unsorted/'
 # path_from = '~/Desktop/photos/2022'
 
 path_from = os.path.normpath(os.path.expanduser(path_from))
@@ -30,7 +30,7 @@ for path, subdirs, files in os.walk(path_from):
         else:
             files20.append(item)
 
-settings = os.path.normpath(os.path.abspath(os.path.expanduser('~/structure_2021.yaml')))
+settings = os.path.normpath(os.path.abspath(os.path.expanduser('~/structure_2022.yaml')))
 
 info = {}
 info['root'] = path_from
