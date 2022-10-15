@@ -28,8 +28,8 @@ import subprocess
 size = 1000, 200
 size_non_thumbnail = 1000, 1000
 
-#rebuild_from_scratch=False
-rebuild_from_scratch = True
+rebuild_from_scratch=False
+# rebuild_from_scratch = True
 rebuild_html_only = False
 #crf = None
 #crf=21
@@ -44,12 +44,12 @@ def fix(input):
     return os.path.normpath(os.path.expanduser(input))
 
 
-#source_root = fix('~/cloud/drive_asu_idealab/videos')
-source_root = fix('/storage/nas/photos/2022')
+source_root = fix('/cloud/drive_asu_idealab/videos')
+# source_root = fix('/storage/nas/photos/2022')
 # source_root = fix('~/cloud/drive_stanford/library/videos')
 
-#gallery_root = fix('~/Desktop/gallery')
-gallery_root = fix('~/Desktop/2022')
+gallery_root = fix('~/Desktop/gallery')
+# gallery_root = fix('~/Desktop/2022')
 # gallery_root = fix('/home/danaukes/Desktop/library_videos')
 
 if rebuild_from_scratch:
@@ -126,8 +126,7 @@ for folder, subfolders, files in os.walk(source_root):
         for item in videos:
             if verbose:
                 print('process video', item)
-            support.process_video(item, folder, newfolder,
-                                  crf, preset, rebuild_from_scratch)
+            support.process_video(item, folder, newfolder,crf, preset, rebuild_from_scratch,verbose=False,size=size)
 
     #     # i.show()
     #     # display(i)
