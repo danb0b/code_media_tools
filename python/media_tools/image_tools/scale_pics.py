@@ -214,12 +214,12 @@ if __name__=='__main__':
     
     path1 = os.path.normpath(os.path.abspath(os.path.curdir))
     
+    all_files = os.listdir(path1)
     files = []
-    
-    for ext in extensions:
-        path2 = os.path.join(path1,'*.'+ext)
-    
-        files.extend(glob.glob(path2))
+
+    for item in all_files:
+        if os.path.splitext(item)[1][1:].lower() in extensions:
+            files.append(item)            
 
     print(files)
         
