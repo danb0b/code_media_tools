@@ -11,7 +11,7 @@ import os
 import argparse
 import yaml
 import shutil
-from IPython.display import display
+#from IPython.display import display
 import media_tools
 from media_tools.video_tools.shrink_videos import Movie
 import media_tools.gallery.support as support
@@ -39,27 +39,11 @@ size_non_thumbnail = 1000, 1000
 #preset = 'ultrafast'
 #verbose = True
 
-import os
 
-def mywalk(top, maxdepth):
-    dirs, nondirs = [], []
-    for entry in os.scandir(top):
-        (dirs if entry.is_dir() else nondirs).append(entry.path)
-    yield top, dirs, nondirs
-    if maxdepth > 1:
-        for path in dirs:
-            for x in mywalk(path, maxdepth-1):
-                yield x
+def fix(path_in):
+    return os.path.normpath(os.path.expanduser(path_in))
 
-
-
-def fix(input):
-    return os.path.normpath(os.path.expanduser(input))
-
-
-def build(source_root,gallery_root,crf=40,preset='ultrafast',rebuild_from_scratch=True,rebuild_html_only=False,verbose=True,max_depth=100):
-
-    dry_run=False
+def build(source_root,gallery_root,crf=40,preset='ultrafast',rebuild_from_scratch=True,rebuild_html_only=False,verbose=True,recursive=True,dry_run=False,images_only=False):
 
     #source_root = fix('/cloud/drive_asu_idealab/videos')
     # source_root = fix('/storage/nas/photos/2022')
@@ -70,7 +54,6 @@ def build(source_root,gallery_root,crf=40,preset='ultrafast',rebuild_from_scratc
     # gallery_root = fix('/home/danaukes/Desktop/library_videos')
 
     crf = float(crf)
-    max_depth = int(max_depth)
     
     source_root = fix(source_root)
     gallery_root = fix(gallery_root)
@@ -79,11 +62,27 @@ def build(source_root,gallery_root,crf=40,preset='ultrafast',rebuild_from_scratc
         if os.path.exists(gallery_root):
             shutil.rmtree(gallery_root)
 
-    for folder, subfolders, files in mywalk(source_root,max_depth):
+    folderinfo = []
+
+    if recursive:
+        for folder, subfolders, files in os.walk(source_root):
+            folderinfo.append((folder, subfolders, files))
+    else:
+        items = os.listdir(source_root)
+        print(source_root,items)
+        subfolders = [item for item in items if os.path.isdir(os.path.join(source_root,item))]
+        files = [item for item in items if os.path.isfile(os.path.join(source_root,item))]
+
+        folderinfo.append((source_root,subfolders,files))
+
+    for folder, subfolders, files in folderinfo:
         images = [item for item in files if (os.path.splitext(
             item)[1][1:]).lower() in media_tools.image_filetypes]
         videos = [item for item in files if (os.path.splitext(
             item)[1][1:]).lower() in media_tools.video_filetypes]
+
+        if images_only:
+            videos = []
 
         if verbose:
             print(yaml.dump(images))
@@ -142,9 +141,6 @@ def build(source_root,gallery_root,crf=40,preset='ultrafast',rebuild_from_scratc
                 if jj > jj_last:
                     print('\r', jj, end="")
 
-                if verbose:
-                    print('process image: ', item, newfolder)
-
                 if not dry_run:
                    support.process_image(item, folder, newfolder,size, size_non_thumbnail, bad_photos)
 
@@ -154,9 +150,8 @@ def build(source_root,gallery_root,crf=40,preset='ultrafast',rebuild_from_scratc
                 if verbose:
                     print('process video', item)
 
-                if False:
-                    if not dry_run:
-                        support.process_video(item, folder, newfolder,crf, preset, rebuild_from_scratch,verbose=False,size=size)
+                if not dry_run:
+                    support.process_video(item, folder, newfolder,crf, preset, rebuild_from_scratch,verbose=False,size=size)
 
         #     # i.show()
         #     # display(i)
@@ -169,18 +164,20 @@ if __name__ == '__main__':
     # # parser.add_argument('-c','--config',dest='config',default = None)
     # # parser.add_argument('-f','--filetype',dest='filetypes',default = 'mp4')
     # # parser.add_argument('-t','--thumbs',dest='thumbs',action='store_true', default = None)
-    parser.add_argument('-i','--input-path',dest='input_path',default = None)
-    parser.add_argument('-o','--output-path',dest='output_path',default = None)
+    parser.add_argument('-i','--input-path',type=str,dest='input_path',default = None)
+    parser.add_argument('-o','--output-path',type=str,dest='output_path',default = None)
     # parser.add_argument('-v','--video_path',dest='video_path',default = None)
     parser.add_argument('-q','--crf',dest='crf',default = '40')
     parser.add_argument('-p','--preset',dest='preset',default = 'ultrafast')
     parser.add_argument('-s','--scratch',dest='scratch',help="rebuild from scratch",action='store_true', default = False)
     parser.add_argument('--html',dest='html',help="rebuild html only",action='store_true', default = False)
-    #parser.add_argument('-d','--dry-run',dest='dry_run',help="dry run",action='store_true', default = False)
+    parser.add_argument('-d','--dry-run',dest='dry_run',help="dry run",action='store_true', default = False)
+    parser.add_argument('--images-only',dest='images_only',help="dry run",action='store_true', default = False)
     parser.add_argument('-v','--verbose',dest='verbose',help="verbose",action='store_true', default = False)
-    parser.add_argument('-d','--max-depth',dest='max_depth',help="max depth", default = 100)
+    #parser.add_argument('-d','--max-depth',dest='max_depth',help="max depth", default = 100)
+    parser.add_argument('-r','--recursive',dest='recursive',help="recursive",action='store_true', default = False)
     # # parser.add_argument('command',metavar='command',type=str,help='command', default = '')
     # # parser.add_argument('--token',dest='token',default = None)
     args = parser.parse_args()
     # print('path: ',args.path)
-    build(args.input_path,args.output_path,args.crf,args.preset,args.scratch,args.html,args.verbose,args.max_depth)
+    build(args.input_path,args.output_path,args.crf,args.preset,args.scratch,args.html,args.verbose,args.recursive,args.dry_run,args.images_only)
