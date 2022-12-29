@@ -59,7 +59,7 @@ def fix(input):
 
 def build(source_root,gallery_root,crf=40,preset='ultrafast',rebuild_from_scratch=True,rebuild_html_only=False,verbose=True,max_depth=100):
 
-    #dry_run=True
+    dry_run=False
 
     #source_root = fix('/cloud/drive_asu_idealab/videos')
     # source_root = fix('/storage/nas/photos/2022')
@@ -142,14 +142,21 @@ def build(source_root,gallery_root,crf=40,preset='ultrafast',rebuild_from_scratc
                 if jj > jj_last:
                     print('\r', jj, end="")
 
-                support.process_image(item, folder, newfolder,
-                                    size, size_non_thumbnail, bad_photos)
+                if verbose:
+                    print('process image: ', item, newfolder)
+
+                if not dry_run:
+                   support.process_image(item, folder, newfolder,size, size_non_thumbnail, bad_photos)
+
                 jj_last = jj
 
             for item in videos:
                 if verbose:
                     print('process video', item)
-                support.process_video(item, folder, newfolder,crf, preset, rebuild_from_scratch,verbose=False,size=size)
+
+                if False:
+                    if not dry_run:
+                        support.process_video(item, folder, newfolder,crf, preset, rebuild_from_scratch,verbose=False,size=size)
 
         #     # i.show()
         #     # display(i)
