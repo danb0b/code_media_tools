@@ -30,7 +30,7 @@ def extract(path):
     
         for ii,image in enumerate(images):
             # i = images[0]
-            factor = 1000/image.width
+            factor = 3000/image.width
             
             if factor<1:
                 image = image.resize((int(factor*image.width),int(factor*image.height)))
