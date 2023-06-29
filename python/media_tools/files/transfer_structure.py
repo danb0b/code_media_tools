@@ -37,7 +37,9 @@ def transfer_structure(input_file,path_to,dry_run=True,verbose=True):
         folder,filename = os.path.split(item)
         file_from = os.path.join(path_to,filename)
         file_to= os.path.join(path_to,item)
-        all_folders.append(folder)
+        folder_to= os.path.join(path_to,folder)
+
+        all_folders.append(folder_to)
         files_from_to.append((file_from,file_to))
         
     all_folders = list(set(all_folders))

@@ -206,7 +206,11 @@ if __name__=='__main__':
         for key in list(sorted_info):
             value = sorted_info[key]
             if len(value)<int(args.min_folder_num):
-                sorted_info['unsorted'].extend(value)
+                try:
+                    sorted_info['unsorted'].extend(value)
+                except KeyError:
+                    sorted_info['unsorted']=[]
+                    sorted_info['unsorted'].extend(value)
                 del sorted_info[key]
                 
         if args.output:
