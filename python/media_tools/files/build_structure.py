@@ -19,6 +19,7 @@ def build_structure(path_in,output_file = None,verbose=True):
     for path, subdirs, files in os.walk(path_in):
         if verbose:
             print(path)
+        print(files)
         files1 = [os.path.join(path,file) for file in files]
         files2= [item.split(path_in)[1] for item in files1]
         for item in files2:
