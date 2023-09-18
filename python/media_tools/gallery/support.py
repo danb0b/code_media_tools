@@ -27,40 +27,41 @@ def get_rotate_amount(exif):
         return 0
 
 
-def process_image(item, folder, newfolder, size, size_non_thumbnail, bad_photos):
+def process_image(item, folder, newfolder, size, size_non_thumbnail, bad_photos,dry_run=False):
 
-    from_file_name = os.path.join(folder, item)
+    if not dry_run:
+        from_file_name = os.path.join(folder, item)
+        try:
+            i = Image.open(from_file_name)
+            e = i.getexif()
+            r = get_rotate_amount(e)
+            non_i = i.copy()
+            if r in (0, 180):
+                i.thumbnail(size)
+                non_i.thumbnail(size_non_thumbnail)
+            else:
+                i.thumbnail(size[::-1])
+                non_i.thumbnail(size_non_thumbnail[::-1])
+            if r != 0:
+                i = i.rotate(r, expand=True)
+                non_i = non_i.rotate(r, expand=True)
+            a, b = os.path.splitext(item)
+            i.save(os.path.join(newfolder, a+'_thumb'+b))
+            non_i.save(os.path.join(newfolder, item))
+        #     # i.show()
+        #     # display(i)
+        except PIL.UnidentifiedImageError:
+            bad_photos.append(from_file_name)
+
+
+def process_video(item, folder, newfolder, crf, preset, rebuild_from_scratch, verbose, size,dry_run=False):
+    movie = Movie(os.path.join(folder, item), video_path=newfolder,thumb_path=newfolder, crf=crf, preset=preset)
     try:
-        i = Image.open(from_file_name)
-        e = i.getexif()
-        r = get_rotate_amount(e)
-        non_i = i.copy()
-        if r in (0, 180):
+        movie.process(force=rebuild_from_scratch, verbose=verbose,dry_run=dry_run)
+        if not dry_run:
+            i = Image.open(movie.thumb_dest)
             i.thumbnail(size)
-            non_i.thumbnail(size_non_thumbnail)
-        else:
-            i.thumbnail(size[::-1])
-            non_i.thumbnail(size_non_thumbnail[::-1])
-        if r != 0:
-            i = i.rotate(r, expand=True)
-            non_i = non_i.rotate(r, expand=True)
-        a, b = os.path.splitext(item)
-        i.save(os.path.join(newfolder, a+'_thumb'+b))
-        non_i.save(os.path.join(newfolder, item))
-    #     # i.show()
-    #     # display(i)
-    except PIL.UnidentifiedImageError:
-        bad_photos.append(from_file_name)
-
-
-def process_video(item, folder, newfolder, crf, preset, rebuild_from_scratch, verbose, size):
-    movie = Movie(os.path.join(folder, item), video_path=newfolder,
-                  thumb_path=newfolder, crf=crf, preset=preset)
-    try:
-        movie.process(force=rebuild_from_scratch, verbose=verbose)
-        i = Image.open(movie.thumb_dest)
-        i.thumbnail(size)
-        thumb = os.path.splitext(movie.thumb_dest)[0]+'_thumb.png'
-        i.save(thumb)
+            thumb = os.path.splitext(movie.thumb_dest)[0]+'_thumb.png'
+            i.save(thumb)
     except FileNotFoundError:
         print('file not found: ', item)

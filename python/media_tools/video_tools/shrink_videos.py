@@ -132,39 +132,46 @@ class Movie(object):
         s = 'ffmpeg -y '+mt_string+' -i "'+self.video_source+'" -q:v 1 -qscale:v 2 -frames:v 1 "'+self.thumb_dest+'"'
         return s
     
-    def process(self,force=False,verbose=False):
+    def process(self,force=False,verbose=False,dry_run=False):
         if self.video_dest is not None:
             video_folder = os.path.split(self.video_dest)[0]
             if not os.path.exists(video_folder):
-                os.makedirs(video_folder)
+                if not dry_run:
+                    os.makedirs(video_folder)
             if (not os.path.exists(self.video_dest)) or force:
                 s = self.compose_video_string()
                 if verbose:
                     print(s)
-                result=subprocess.run(s, shell=True, capture_output=True)
+                if not dry_run:
+                    result=subprocess.run(s, shell=True, capture_output=True)
             else:
                 if verbose:
                     print('video exists: ',self.video_dest)
             if (not os.path.exists(self.video_dest)):
-                raise(SubProcessFailure(self.video_dest))
+                if not dry_run:
+                    raise(SubProcessFailure(self.video_dest))
         if self.thumb_dest is not None:
             try:
                 thumb_folder = os.path.split(self.thumb_dest)[0]
                 if not os.path.exists(thumb_folder):
-                    os.makedirs(thumb_folder)
+                    if not dry_run:
+                        os.makedirs(thumb_folder)
                 if (not os.path.exists(self.thumb_dest)) or force:
                     s = self.compose_thumb_string()
                     if verbose:
                         print(s)
-                    result=subprocess.run(s, shell=True, capture_output=True)
+                    if not dry_run:
+                        result=subprocess.run(s, shell=True, capture_output=True)
                 else:
                     if verbose:
                         print('thumb exists: ',self.thumb_dest)
             except vi.NoVideoStream:
                 raise
-                
             if (not os.path.exists(self.video_dest)):
-                raise(SubProcessFailure(self.thumb_Dest))
+
+                if not dry_run:
+
+                    raise(SubProcessFailure(self.thumb_Dest))
         
 
 def clean_path(path_in):

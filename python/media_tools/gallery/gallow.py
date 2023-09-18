@@ -59,8 +59,9 @@ def build(source_root,gallery_root,crf=40,preset='ultrafast',rebuild_from_scratc
     gallery_root = fix(gallery_root)
 
     if rebuild_from_scratch:
-        if os.path.exists(gallery_root):
-            shutil.rmtree(gallery_root)
+        if not dry_run:
+            if os.path.exists(gallery_root):
+                shutil.rmtree(gallery_root)
 
     folderinfo = []
 
@@ -93,7 +94,8 @@ def build(source_root,gallery_root,crf=40,preset='ultrafast',rebuild_from_scratc
         tail = folder.split(os.path.sep)[len(elements):]
         newfolder = os.path.join(gallery_root, *tail)
         try:
-            os.makedirs(newfolder)
+            if not dry_run:
+                os.makedirs(newfolder)
         except FileExistsError:
             if rebuild_from_scratch:
                 raise
@@ -126,8 +128,7 @@ def build(source_root,gallery_root,crf=40,preset='ultrafast',rebuild_from_scratc
         with open(markdown_file_path, 'w') as f:
             f.write(s)
 
-        subprocess.run('pandoc "{0}" -o "{1}"'.format(markdown_file_path,
-                    html_file_path), capture_output=True, shell=True)
+        subprocess.run('pandoc "{0}" -o "{1}"'.format(markdown_file_path,html_file_path), capture_output=True, shell=True)
 
         # to_strip = os.path.normpath(to_strip).split(os.path.sep)
 
@@ -141,8 +142,7 @@ def build(source_root,gallery_root,crf=40,preset='ultrafast',rebuild_from_scratc
                 if jj > jj_last:
                     print('\r', jj, end="")
 
-                if not dry_run:
-                   support.process_image(item, folder, newfolder,size, size_non_thumbnail, bad_photos)
+                support.process_image(item, folder, newfolder,size, size_non_thumbnail, bad_photos,dry_run=dry_run)
 
                 jj_last = jj
 
@@ -150,8 +150,7 @@ def build(source_root,gallery_root,crf=40,preset='ultrafast',rebuild_from_scratc
                 if verbose:
                     print('process video', item)
 
-                if not dry_run:
-                    support.process_video(item, folder, newfolder,crf, preset, rebuild_from_scratch,verbose=False,size=size)
+                support.process_video(item, folder, newfolder,crf, preset, rebuild_from_scratch,verbose=False,size=size,dry_run=dry_run)
 
         #     # i.show()
         #     # display(i)
