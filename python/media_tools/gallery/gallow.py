@@ -86,7 +86,9 @@ def build(source_root,gallery_root,crf=40,preset='ultrafast',rebuild_from_scratc
             videos = []
 
         if verbose:
+            print('Directory {}\nImages:'.format(folder))
             print(yaml.dump(images))
+            print('Videos:')
             print(yaml.dump(videos))
 
         to_strip = os.path.commonpath([source_root, folder])

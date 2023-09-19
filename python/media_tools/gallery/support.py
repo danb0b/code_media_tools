@@ -1,7 +1,7 @@
 import PIL
 from PIL import Image,  ExifTags
 import os
-from media_tools.video_tools.shrink_videos import Movie
+from media_tools.video_tools.shrink_videos import Movie, SubProcessFailure
 
 
 def get_rotate_amount(exif):
@@ -65,3 +65,5 @@ def process_video(item, folder, newfolder, crf, preset, rebuild_from_scratch, ve
             i.save(thumb)
     except FileNotFoundError:
         print('file not found: ', item)
+    except SubProcessFailure as f:
+        print(f)
