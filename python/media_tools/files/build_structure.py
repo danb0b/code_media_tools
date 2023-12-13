@@ -29,7 +29,7 @@ def build_structure(path_in,output_file = None,verbose=True):
 
     info = {}
     info['root'] = path_in
-    info['files'] = files20
+    info['files'] = sorted(files20)
 
     if output_file is not None:
 
