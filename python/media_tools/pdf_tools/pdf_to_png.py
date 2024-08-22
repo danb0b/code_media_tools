@@ -18,23 +18,29 @@ from pdf2image.exceptions import (
 
 def extract(path):
     pdfs = glob.glob(path)
-    
+    print('pdfs: ',pdfs)
     for pdf in pdfs:
+        print('pdf:', pdf)
         folder,file = os.path.split(pdf)
         file_root,dummy = os.path.splitext(file)
-        images = convert_from_path(pdf)
-        if len(images)==1:
-            index_string = ''
-        else:
-            index_string = '_{0:03.0f}'
+        output_folder = os.path.join(folder,file_root+'_extract')
+        try:
+            os.makedirs(output_folder)
+        except FileExistsError:
+            pass
+        images = convert_from_path(pdf,output_folder=output_folder,dpi=100,fmt='png',output_file=file_root+'_')
+        # if len(images)==1:
+        #     index_string = ''
+        # else:
+        #     index_string = '_{0:03.0f}'
     
-        for ii,image in enumerate(images):
+        # for ii,image in enumerate(images):
             # i = images[0]
-            factor = 3000/image.width
+            # factor = 3000/image.width
             
-            if factor<1:
-                image = image.resize((int(factor*image.width),int(factor*image.height)))
-            image.save(os.path.join(folder,'{0}{1}.png'.format(file_root,index_string.format(ii))),'png')
+            # if factor<1:
+                # image = image.resize((int(factor*image.width),int(factor*image.height)))
+            # image.save(os.path.join(folder,'{0}{1}.png'.format(file_root,index_string.format(ii))),'png')
 
 
 if __name__=='__main__':
@@ -46,5 +52,6 @@ if __name__=='__main__':
     args = parser.parse_args()
 
     paths = [os.path.normpath(os.path.expanduser(item)) for item in args.path]
+    print('paths: ',paths)
     for path in paths:
         extract(path)
