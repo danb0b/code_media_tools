@@ -34,6 +34,6 @@ def slugify(string_in,max_len = 64):
     return string_in
 
 if __name__=='__main__':
-    text = '---asdfa..sdfasdfasdfqiuoewrpqowirupqower,m.nxcv.zm,x;,../<>?][\\01980912837986!@#$!$#%@#%$^#$%&%#^&&%^*^&#@$%!#%!~``[]\;'
+    text = '---asdfa..sdfasdfasdfqiuoewrpqowirupqower,m.nxcv.zm,x;,../<>?][\\01980912837986!@#$!$#%@#%$^#$%&%#^&&%^*^&#@$%!#%!~``[];'
     
     print(slugify(text))
