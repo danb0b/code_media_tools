@@ -16,7 +16,7 @@ from pdf2image.exceptions import (
     PDFSyntaxError
 )
 
-def extract(path):
+def extract(path,dpi):
     pdfs = glob.glob(path)
     print('pdfs: ',pdfs)
     for pdf in pdfs:
@@ -28,7 +28,8 @@ def extract(path):
             os.makedirs(output_folder)
         except FileExistsError:
             pass
-        images = convert_from_path(pdf,output_folder=output_folder,dpi=100,fmt='png',output_file=file_root+'_')
+        dpi = int(dpi)
+        images = convert_from_path(pdf,output_folder=output_folder,dpi=dpi,fmt='png',output_file=file_root+'_')
         # if len(images)==1:
         #     index_string = ''
         # else:
@@ -47,6 +48,7 @@ if __name__=='__main__':
     
     parser = argparse.ArgumentParser()
     
+    parser.add_argument('-d','--dpi',dest='dpi',metavar='dpi',type=int,help='dpi', default = 100)
     parser.add_argument('path',metavar='path',type=str,help='path', default = None,nargs='+')
 
     args = parser.parse_args()
@@ -54,4 +56,4 @@ if __name__=='__main__':
     paths = [os.path.normpath(os.path.expanduser(item)) for item in args.path]
     print('paths: ',paths)
     for path in paths:
-        extract(path)
+        extract(path,args.dpi)
