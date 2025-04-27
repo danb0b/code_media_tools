@@ -5,8 +5,8 @@ Created on Tue Jul  7 23:49:30 2020
 @author: danaukes
 """
 
-import file_sorter.support as fus
-import file_sorter.images as fui
+import media_tools.files.support as fus
+import media_tools.files.images as fui
 import yaml
 import os
 import argparse
@@ -21,7 +21,7 @@ if __name__=='__main__':
     parser.add_argument('-o','--output',dest='output',default = None)
     parser.add_argument('-r','--recursive',dest='recursive',action='store_true', default = False)
     parser.add_argument('-v','--verbose',dest='verbose',action='store_true', default = False)
-    parser.add_argument('-m','--method',dest='method',default = None)
+    parser.add_argument('-m','--method',dest='method',default = 'sha256',help='"size" or "sha256"')
     parser.add_argument('-s','--save-hashfile',dest='save_hashfile',action='store_true', default = False)
     
     args = parser.parse_args()

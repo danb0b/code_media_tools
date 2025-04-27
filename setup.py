@@ -11,7 +11,7 @@ import shutil
 
 shutil.rmtree("build", ignore_errors=True)
 shutil.rmtree("dist", ignore_errors=True)
-shutil.rmtree('file_sorter.egg-info', ignore_errors=True)
+shutil.rmtree('media_tools.files.egg-info', ignore_errors=True)
 
 
 packages = []

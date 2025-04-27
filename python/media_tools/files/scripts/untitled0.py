@@ -9,8 +9,8 @@ import yaml
 import os
 import sys
 import glob
-from file_sorter.support import HashFile
-import file_sorter.support as fus
+from media_tools.files.support import HashFile
+import media_tools.files.support as fus
 import matplotlib.pyplot as plt
 plt.ion()
 

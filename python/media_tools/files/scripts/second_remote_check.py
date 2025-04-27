@@ -5,8 +5,8 @@ Created on Tue May 25 16:17:18 2021
 @author: danaukes
 """
 
-import file_sorter.support as fus
-import file_sorter.images as fui
+import media_tools.files.support as fus
+import media_tools.files.images as fui
 import yaml
 import os
 import shutil
