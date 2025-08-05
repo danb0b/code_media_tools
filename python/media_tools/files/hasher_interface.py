@@ -71,8 +71,8 @@ if __name__=='__main__':
     else:
         hash1 = fus.scan_list(path,directories_recursive=args.recursive,file_filter=fus.filter_yaml,hasher=hasher,directory_hashfile_name=hashfile_name,verbose=args.verbose)
 
-    if args.verbose:
-        print(yaml.dump(hash1))
+    # if args.verbose:
+    #     print(yaml.dump(hash1))
 
     if args.output is not None:
         hash1.save(args.output)
@@ -84,6 +84,6 @@ if __name__=='__main__':
             duplicates2.extend(value)
             
     if args.verbose:
-        print('Resulting Duplicates:',yaml.dump(duplicates2))
+        print('duplicate hashes:',yaml.dump(duplicates2))
         
         

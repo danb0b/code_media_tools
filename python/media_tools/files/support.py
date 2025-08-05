@@ -31,17 +31,21 @@ class HashFile(object):
         ii = 0
         l = len(compare_files)
         for filename in compare_files:
+            if verbose:
+                if ii%1==0:
+                    print('getting file info {0:d}/{1:d}: {2:s}'.format(ii+1,l,filename))
             filename = os.path.normpath(filename)
-            img_hash= hasher(filename)
+            try:
+                img_hash= hasher(filename,verbose)
+            except FileNotFoundError:
+                if verbose:
+                    print('file not found: {}'.format(filename))
             compare_hash_dict[filename] = img_hash
             compare_hashes.append(img_hash)
             if img_hash not in compare_hash_dict_rev:
                 compare_hash_dict_rev[img_hash] = [filename]
             else:
                 compare_hash_dict_rev[img_hash].append(filename)
-            if verbose:
-                if ii%10==0:
-                    print('getting file info',ii,l)
             ii+=1
         
         compare_hash_set = list(set(compare_hashes))
@@ -75,20 +79,19 @@ def filter_files(items,file_filter):
 # def scan_file_list(list):
 #     return HashFile.build(all_compare_files,hasher)
 
-def dummy(dirpath,dirnames,filenames,verbose,directory_hashfile_name):
+def dummy(dirpath,filenames,verbose,directory_hashfile_name,hasher,file_filter):
     dirpath = fix(dirpath)
     filenames = [os.path.join(dirpath,item) for item in filenames]
     filenames = filter_files(filenames,file_filter)
-    
-    hash_file = HashFile.build(*filenames,hasher=hasher)
+    hash_file = HashFile.build(*filenames,hasher=hasher,verbose=verbose)
     if directory_hashfile_name is not None:
         hash_file.save(dirpath,directory_hashfile_name)
 
     if verbose:
         print('finding files',dirpath)
 
-    all_compare_files.extend(filenames)
-    global_hash_file.merge(hash_file)
+    
+    return hash_file,filenames
 
 
 def scan_list(*compare_paths,hasher = None, file_filter = None, directories_recursive=False,directory_hashfile_name = None,verbose=False):
@@ -104,25 +107,16 @@ def scan_list(*compare_paths,hasher = None, file_filter = None, directories_recu
         if os.path.isdir(item):
             if directories_recursive:
                 for dirpath,dirnames,filenames in os.walk(item):
-                    dummy(dirpath,dirnames,filenames)
-            else:
-                dirpath = item
-                dirpath = fix(dirpath)
-                filenames = os.listdir(dirpath)
-                filenames = [os.path.join(dirpath,item) for item in filenames]
-                filenames = [item for item in filenames if os.path.isfile(item)]
-                filenames = filter_files(filenames,file_filter)
-            
-                hash_file = HashFile.build(*filenames,hasher=hasher)
-                if directory_hashfile_name is not None:
-                    hash_file.save(dirpath,directory_hashfile_name)
+                    hash_file,filenames=dummy(dirpath,filenames,verbose,directory_hashfile_name,hasher,file_filter)
+                    all_compare_files.extend(filenames)
+                    global_hash_file.merge(hash_file)
 
-                if verbose:
-                    print('finding files',dirpath)
-    
+            else:
+                filenames = os.listdir(item)
+                filenames = [filename for filename in filenames if os.path.isfile(os.path.join(item,filename))]
+                hash_file,filenames=dummy(dirpath,filenames,verbose,directory_hashfile_name,hasher,file_filter)
                 all_compare_files.extend(filenames)
                 global_hash_file.merge(hash_file)
-
         else:
             hash_file = HashFile.build(item,hasher=hasher)
 
