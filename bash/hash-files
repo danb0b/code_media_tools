@@ -1,5 +1,5 @@
 #!/bin/bash
 MY_PATH="`dirname \"$0\"`"
 
-python3 $MY_PATH/../python/media_tools/files/scripts/hash_files.py "$@"
+python3 $MY_PATH/../python/media_tools/files/interface.py "$@"
 
