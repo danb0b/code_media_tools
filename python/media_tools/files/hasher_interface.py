@@ -81,9 +81,10 @@ if __name__=='__main__':
 
     for key,value in hash1.hash_file_dict.items():
         if len(value)>1:
-            duplicates2.extend(value)
+            duplicates2.append(value)
             
     if args.verbose:
-        print('duplicate hashes:',yaml.dump(duplicates2))
+        print('duplicate hashes:')
+        print(yaml.dump(duplicates2))
         
         

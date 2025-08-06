@@ -36,7 +36,7 @@ class HashFile(object):
                     print('getting file info {0:d}/{1:d}: {2:s}'.format(ii+1,l,filename))
             filename = os.path.normpath(filename)
             try:
-                img_hash= hasher(filename,verbose)
+                img_hash= hasher(filename)
                 compare_hash_dict[filename] = img_hash
                 compare_hashes.append(img_hash)
                 if img_hash not in compare_hash_dict_rev:
@@ -75,9 +75,6 @@ class HashFile(object):
         
 def filter_files(items,file_filter):
     return [item for item in items if (file_filter(item))]
-
-# def scan_file_list(list):
-#     return HashFile.build(all_compare_files,hasher)
 
 def dummy(dirpath,filenames,verbose,directory_hashfile_name,hasher,file_filter):
     dirpath = fix(dirpath)
