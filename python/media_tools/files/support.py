@@ -37,16 +37,16 @@ class HashFile(object):
             filename = os.path.normpath(filename)
             try:
                 img_hash= hasher(filename,verbose)
+                compare_hash_dict[filename] = img_hash
+                compare_hashes.append(img_hash)
+                if img_hash not in compare_hash_dict_rev:
+                    compare_hash_dict_rev[img_hash] = [filename]
+                else:
+                    compare_hash_dict_rev[img_hash].append(filename)
+                ii+=1
             except FileNotFoundError:
                 if verbose:
                     print('file not found: {}'.format(filename))
-            compare_hash_dict[filename] = img_hash
-            compare_hashes.append(img_hash)
-            if img_hash not in compare_hash_dict_rev:
-                compare_hash_dict_rev[img_hash] = [filename]
-            else:
-                compare_hash_dict_rev[img_hash].append(filename)
-            ii+=1
         
         compare_hash_set = list(set(compare_hashes))
         new = cls(compare_hash_dict_rev,compare_hash_dict,compare_hash_set)
@@ -99,7 +99,7 @@ def scan_list(*compare_paths,hasher = None, file_filter = None, directories_recu
     file_filter = file_filter or filter_none
     
     all_compare_files = []    
-    global_hash_file = HashFile.build(hasher=hasher)
+    global_hash_file = HashFile.build(hasher=hasher,verbose=verbose)
 
     for item in compare_paths:
         item = fix(item)
@@ -118,7 +118,7 @@ def scan_list(*compare_paths,hasher = None, file_filter = None, directories_recu
                 all_compare_files.extend(filenames)
                 global_hash_file.merge(hash_file)
         else:
-            hash_file = HashFile.build(item,hasher=hasher)
+            hash_file = HashFile.build(item,hasher=hasher,verbose=verbose)
 
             if verbose:
                 print('finding files',item)
