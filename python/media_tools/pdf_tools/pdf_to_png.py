@@ -16,7 +16,7 @@ from pdf2image.exceptions import (
     PDFSyntaxError
 )
 
-def extract(path,dpi):
+def extract(path,dpi,first_page=None,last_page=None):
     pdfs = glob.glob(path)
     print('pdfs: ',pdfs)
     for pdf in pdfs:
@@ -29,7 +29,7 @@ def extract(path,dpi):
         except FileExistsError:
             pass
         dpi = int(dpi)
-        images = convert_from_path(pdf,output_folder=output_folder,dpi=dpi,fmt='png',output_file=file_root+'_')
+        images = convert_from_path(pdf,output_folder=output_folder,dpi=dpi,fmt='png',output_file=file_root+'_',first_page=first_page,last_page=last_page)
         # if len(images)==1:
         #     index_string = ''
         # else:
@@ -50,10 +50,12 @@ if __name__=='__main__':
     
     parser.add_argument('-d','--dpi',dest='dpi',metavar='dpi',type=int,help='dpi', default = 100)
     parser.add_argument('path',metavar='path',type=str,help='path', default = None,nargs='+')
+    parser.add_argument('-f','--first-page',dest='first_page',metavar='first_page',type=int,help='first page', default = None)
+    parser.add_argument('-l','--last-page',dest='last_page',metavar='last_page',type=int,help='last page', default = None)
 
     args = parser.parse_args()
 
     paths = [os.path.normpath(os.path.expanduser(item)) for item in args.path]
     print('paths: ',paths)
     for path in paths:
-        extract(path,args.dpi)
+        extract(path,args.dpi,first_page=args.first_page,last_page=args.last_page)
