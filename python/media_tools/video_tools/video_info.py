@@ -29,8 +29,8 @@ def parse(string):
 
     dicts = []
     while cont:
-        a = re.search('\[[A-Z]*\]',string)
-        b = re.search('\[/[A-Z]*\]',string)
+        a = re.search('\\[[A-Z]*\\]',string)
+        b = re.search('\\[/[A-Z]*\\]',string)
         if a is not None:
             ii = a.span()[1]
             jj = b.span()[0]
