@@ -102,7 +102,7 @@ def scale_pad(img,dimension,goal_ratio):
 
     w_new = int(w_new)
     h_new = int(h_new)
-    img_new = img.resize((w_new, h_new), Image.ANTIALIAS)
+    img_new = img.resize((w_new, h_new))
     img_new2 = pad_center(img_new,canvas_w,canvas_h)
 
     return img_new2
@@ -111,14 +111,14 @@ def scale_by_width(img,width):
     wpercent = (width / float(img.size[0]))
     if (wpercent<1) or upscale:
         hsize = int((float(img.size[1]) * float(wpercent)))
-        img = img.resize((int(width), hsize), Image.ANTIALIAS)
+        img = img.resize((int(width), hsize))
     return img
 
 def scale_by_height(img,height):
     hpercent = (height / float(img.size[1]))
     if (hpercent<1) or upscale:
         wsize = int((float(img.size[0]) * float(hpercent)))
-        img = img.resize((wsize, int(height)), Image.ANTIALIAS)
+        img = img.resize((wsize, int(height)))
     return img
 
 def scale_by_max(img,width):
@@ -127,7 +127,7 @@ def scale_by_max(img,width):
     if (wpercent<1) or upscale:
         wsize = int((float(img.size[0]) * float(wpercent)))
         hsize = int((float(img.size[1]) * float(wpercent)))
-        img = img.resize((wsize, hsize), Image.ANTIALIAS)
+        img = img.resize((wsize, hsize))
     return img
         
 def format_float(string1):
