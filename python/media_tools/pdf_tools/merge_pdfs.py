@@ -2,7 +2,7 @@ from pypdf import PdfWriter
 import os
 import shutil
 import yaml
-
+import argparse
 
 # root='/media/dropbox_asu/classes/me473/course-folder/'
 root = '/home/danaukes/Desktop/temp/course-folder/'
@@ -21,8 +21,6 @@ all_pdfs.sort()
 
 s = yaml.dump(all_pdfs)
 print(s)
-
-
 
 merger = PdfWriter()
 
