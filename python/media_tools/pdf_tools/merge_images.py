@@ -45,6 +45,6 @@ if __name__=='__main__':
     # watermark_path = source_folder+'/../watermark.png'
     args = parser.parse_args()
 
-    print(args.path)
+    print(args.path,args.watermark)
 
     merge(args.path,args.watermark)
