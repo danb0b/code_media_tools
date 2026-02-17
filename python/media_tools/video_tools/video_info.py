@@ -87,6 +87,7 @@ class NoVideoStream(Exception):
 
 class VideoInfo(object):
     def __init__(self,file):
+        self.file = file
         if os.path.exists(file):
             s2 = 'ffprobe -v error -show_format -show_streams '+'"'+file+'"'
             result=subprocess.run(s2, shell=True, capture_output=True)
@@ -105,6 +106,7 @@ class VideoInfo(object):
             except AttributeError:
                 pass
         return f
+
     def get_max_length(self):
         try:
             result = max([float(eval(item.duration.value)) for item in self.get_videos()])
@@ -112,8 +114,12 @@ class VideoInfo(object):
         except ValueError:
             raise(NoVideoStream())
 
+    def get_max_length2(self):
+        s3 = 'ffprobe -v error -show_entries format=duration -of default=noprint_wrappers=1:nokey=1 "' +self.file+'"'
+        result=subprocess.run(s3, shell=True, capture_output=True)
+        decoded_result = result.stdout.decode()
+        return float(decoded_result)
 
-              
 def frame_to_time(frame,frame_rate):
     secs = frame/frame_rate
 #    h = int(secs/3600)

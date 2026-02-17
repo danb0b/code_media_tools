@@ -102,7 +102,7 @@ class Movie(object):
         s = self.start_time or 0
         if self.end_time is None:
             info = vi.VideoInfo(self.video_source)
-            e = info.get_max_length()
+            e = info.get_max_length2()
         else:
             e = self.end_time
         m = s+(e-s)/2
